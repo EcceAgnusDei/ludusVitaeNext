@@ -7,3 +7,9 @@ export async function getServerSession() {
     headers: await headers(),
   });
 }
+
+/** Utilisateur courant ou `null` (pages / layouts serveur). */
+export async function getCurrentUser() {
+  const session = await getServerSession();
+  return session?.user ?? null;
+}

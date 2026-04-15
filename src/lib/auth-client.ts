@@ -1,5 +1,13 @@
 import { createAuthClient } from "better-auth/react";
 
+/** Origine de l’app (sans slash final), alignée avec `resolveBaseURL()` côté serveur. */
+function resolveAuthClientOrigin(): string {
+  const fromEnv = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  if (fromEnv) return fromEnv.replace(/\/+$/, "");
+  if (typeof window !== "undefined") return window.location.origin;
+  return "http://localhost:3000";
+}
+
 export const authClient = createAuthClient({
-  baseURL: process.env.NEXT_PUBLIC_APP_URL || undefined,
+  baseURL: resolveAuthClientOrigin(),
 });
