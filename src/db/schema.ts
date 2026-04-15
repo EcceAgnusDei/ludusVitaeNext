@@ -28,7 +28,12 @@ export const user = pgTable(
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
   },
-  (table) => [unique("user_email_key").on(table.email)],
+  (table) => [
+    unique("user_email_key").on(table.email),
+    uniqueIndex("user_name_lower_trim_unique").on(
+      sql`LOWER(TRIM(${table.name}))`,
+    ),
+  ],
 );
 
 export const session = pgTable(
@@ -168,6 +173,11 @@ export const grid = pgTable(
       "btree",
       table.userId.asc().nullsLast().op("text_ops"),
     ),
+    index("grid_userId_createdAt_idx").using(
+      "btree",
+      table.userId.asc().nullsLast().op("text_ops"),
+      table.createdAt.desc().nullsFirst().op("timestamptz_ops"),
+    ),
     foreignKey({
       columns: [table.userId],
       foreignColumns: [user.id],
@@ -205,7 +215,7 @@ export const gridLike = pgTable(
       name: "grid_like_userId_fkey",
     }).onDelete("cascade"),
     primaryKey({
-      columns: [table.userId, table.gridId],
+      columns: [table.gridId, table.userId],
       name: "grid_like_pkey",
     }),
   ],
