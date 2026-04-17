@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 
 import { getDb } from "@/db";
-import { gridsMethodNotAllowed } from "@/lib/grids/method-not-allowed";
-import { deleteOwnedGrid, updateGridVisibility } from "@/lib/grids/repository";
-import { parsePatchGridBody } from "@/lib/grids/schemas";
-import { requireUserId } from "@/lib/grids/route-auth";
-import { withGridsRouteErrors } from "@/lib/grids/route-error";
+import { gridsMethodNotAllowed } from "@/lib/grids-api/method-not-allowed";
+import { deleteOwnedGrid, updateGridVisibility } from "@/lib/grids-api/repository";
+import { parsePatchGridBody } from "@/lib/grids-api/schemas";
+import { requireUserId } from "@/lib/grids-api/route-auth";
+import { withGridsRouteErrors } from "@/lib/grids-api/route-error";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

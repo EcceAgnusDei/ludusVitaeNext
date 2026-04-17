@@ -12,7 +12,7 @@ import type {
   GridsCursorPopular,
   GridsCursorRecent,
   GridsListSortMode,
-} from "@/lib/grids/cursor";
+} from "@/lib/grids-api/cursor";
 
 export type GridsDb = ReturnType<typeof getDb>;
 

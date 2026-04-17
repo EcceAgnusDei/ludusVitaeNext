@@ -19,9 +19,15 @@ export default function Home() {
         </h1>
         <p className="text-muted-foreground max-w-xl text-sm leading-relaxed">
           L’authentification Better Auth est disponible sur cette origine
-          (connexion / inscription). Les pages jeu et grilles suivront.
+          (connexion / inscription). La page jeu est disponible ; les autres
+          écrans (grilles, mon espace) suivront.
         </p>
         <ul className="text-muted-foreground list-inside list-disc text-sm">
+          <li>
+            <Link className="text-primary underline-offset-4 hover:underline" href="/jeu">
+              Jeu
+            </Link>
+          </li>
           <li>
             <Link className="text-primary underline-offset-4 hover:underline" href="/connexion">
               Connexion

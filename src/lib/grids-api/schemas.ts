@@ -9,7 +9,7 @@ import {
   parseGridsPageLimit,
   type GridsCursorPayload,
   type GridsListSortMode,
-} from "@/lib/grids/cursor";
+} from "@/lib/grids-api/cursor";
 
 // =============================================================================
 // Validation — schémas Zod et règles sur la forme des données

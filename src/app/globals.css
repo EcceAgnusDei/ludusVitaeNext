@@ -128,3 +128,14 @@
     @apply font-sans;
   }
 }
+
+/* Jeu de la vie : cellules (composant Grid) */
+.lv-cell {
+  box-sizing: border-box;
+  border: 1px solid color-mix(in oklch, var(--foreground) 32%, var(--border));
+  background-color: var(--background);
+}
+
+.lv-cell--alive {
+  background-color: var(--foreground);
+}
