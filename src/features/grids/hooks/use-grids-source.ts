@@ -12,7 +12,10 @@ import type { SavedGrid } from "@/features/grids/lib/saved-grid";
 
 export type GridsSourceSort = "recent" | "popular";
 
-export type UseGridsSourceOptions = { kind: "explore"; sort: GridsSourceSort };
+export type UseGridsSourceOptions =
+  | { kind: "explore"; sort: GridsSourceSort }
+  | { kind: "user"; userId: string; sort: GridsSourceSort }
+  | { kind: "likes" };
 
 function parseGridsPage(body: unknown): {
   items: SavedGrid[];
@@ -40,7 +43,9 @@ function parseGridsPage(body: unknown): {
 }
 
 export function useGridsSource(options: UseGridsSourceOptions) {
-  const sort = options.sort;
+  const kind = options.kind;
+  const sort = kind === "explore" || kind === "user" ? options.sort : undefined;
+  const userId = kind === "user" ? options.userId : undefined;
 
   const [grids, setGrids] = useState<SavedGrid[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -63,6 +68,69 @@ export function useGridsSource(options: UseGridsSourceOptions) {
 
     void (async () => {
       try {
+        if (kind === "likes") {
+          const res = await fetch("/api/grids/me/likes", {
+            credentials: "include",
+          });
+          if (cancelled) return;
+
+          if (res.status === 401) {
+            setError("Connectez-vous pour voir vos grilles aimées.");
+            setGrids([]);
+            return;
+          }
+
+          if (!res.ok) {
+            setError("Impossible de charger vos grilles.");
+            setGrids([]);
+            return;
+          }
+
+          const body = (await res.json()) as unknown;
+          const items = Array.isArray(body) ? (body as SavedGrid[]) : null;
+          if (items === null) {
+            setError("Réponse serveur inattendue.");
+            setGrids([]);
+            return;
+          }
+
+          setGrids(items);
+          return;
+        }
+
+        if (kind === "user") {
+          if (!userId) {
+            if (!cancelled) {
+              setLoading(false);
+              setGrids(null);
+            }
+            return;
+          }
+
+          const res = await fetch(
+            `/api/grids/user/${encodeURIComponent(userId)}?sort=${sort}`,
+            { credentials: "include" },
+          );
+          if (cancelled) return;
+
+          if (!res.ok) {
+            setError("Impossible de charger vos grilles.");
+            setGrids([]);
+            return;
+          }
+
+          const body = (await res.json()) as unknown;
+          const items = Array.isArray(body) ? (body as SavedGrid[]) : null;
+          if (items === null) {
+            setError("Réponse serveur inattendue.");
+            setGrids([]);
+            return;
+          }
+
+          setGrids(items);
+          return;
+        }
+
         const res = await fetch(`/api/grids/all?sort=${sort}`, {
           credentials: "include",
         });
@@ -88,6 +156,9 @@ export function useGridsSource(options: UseGridsSourceOptions) {
           setError(
             "Impossible de joindre le serveur. Vérifiez votre connexion.",
           );
+          if (kind !== "explore") {
+            setGrids([]);
+          }
         }
       } finally {
         if (!cancelled) {
@@ -99,9 +170,10 @@ export function useGridsSource(options: UseGridsSourceOptions) {
     return () => {
       cancelled = true;
     };
-  }, [sort]);
+  }, [kind, sort, userId]);
 
-  const loadMore = useCallback(async () => {
+  const loadMoreExplore = useCallback(async () => {
+    if (kind !== "explore" || sort === undefined) return;
     if (!hasMore || nextCursor === null || loadMoreLock.current) return;
     loadMoreLock.current = true;
     pendingLoadMorePaintRef.current = false;
@@ -136,20 +208,23 @@ export function useGridsSource(options: UseGridsSourceOptions) {
         setLoading(false);
       }
     }
-  }, [sort, hasMore, nextCursor]);
+  }, [kind, sort, hasMore, nextCursor]);
 
   useLayoutEffect(() => {
+    if (kind !== "explore") return;
     if (!pendingLoadMorePaintRef.current) return;
     pendingLoadMorePaintRef.current = false;
     loadMoreLock.current = false;
     setLoading(false);
-  }, [grids]);
+  }, [kind, grids]);
+
+  const noopLoadMore = useCallback(async () => {}, []);
 
   return {
     grids,
     error,
     loading,
-    loadMore,
-    hasMore,
+    loadMore: kind === "explore" ? loadMoreExplore : noopLoadMore, //Pour garder une même forme de return entre les différents mode (explore, user, likes)
+    hasMore: kind === "explore" ? hasMore : false,
   };
 }

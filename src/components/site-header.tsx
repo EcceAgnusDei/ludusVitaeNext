@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { UserAuthStrip } from "@/components/auth/user-auth-strip";
+import { MonEspaceHeaderLink } from "@/components/mon-espace-header-link";
 import { cn } from "@/lib/utils";
 
 const navLinkClass =
@@ -24,6 +25,7 @@ export function SiteHeader() {
             <Link href="/jeu" className={cn(navLinkClass)}>
               Jeu
             </Link>
+            <MonEspaceHeaderLink className={cn(navLinkClass)} />
           </nav>
         </div>
         <UserAuthStrip />
