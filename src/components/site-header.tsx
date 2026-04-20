@@ -15,6 +15,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ConfirmAlertDialog } from "@/components/ui/alert-dialog";
+import { ForgotPasswordModal } from "@/components/auth/forgot-password-modal";
+import { SignInModal } from "@/components/auth/sign-in-modal";
 import { cn } from "@/lib/utils";
 
 type NavLinkItem = {
@@ -193,6 +195,8 @@ function HeaderNavActions({
 export function SiteHeader() {
   const router = useRouter();
   const pathname = usePathname();
+  const [signInOpen, setSignInOpen] = useState(false);
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
   const [menuSheetOpen, setMenuSheetOpen] = useState(false);
   const [accountSheetOpen, setAccountSheetOpen] = useState(false);
   const [deleteAccountPending, setDeleteAccountPending] = useState(false);
@@ -272,7 +276,7 @@ export function SiteHeader() {
         public: true,
         onSelect(fromMobileSheet) {
           if (fromMobileSheet) setMenuSheetOpen(false);
-          router.push("/connexion");
+          setSignInOpen(true);
         },
       },
       {
@@ -493,6 +497,19 @@ export function SiteHeader() {
           </div>
         </div>
       ) : null}
+
+      <SignInModal
+        open={signInOpen}
+        onOpenChange={setSignInOpen}
+        onRequestForgotPassword={() => {
+          setSignInOpen(false);
+          setForgotPasswordOpen(true);
+        }}
+      />
+      <ForgotPasswordModal
+        open={forgotPasswordOpen}
+        onOpenChange={setForgotPasswordOpen}
+      />
     </header>
   );
 }

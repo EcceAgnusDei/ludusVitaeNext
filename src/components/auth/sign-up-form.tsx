@@ -167,16 +167,6 @@ export function SignUpForm() {
             </Link>
             .
           </p>
-
-          <p className="text-muted-foreground text-center text-sm">
-            Déjà un compte ?{" "}
-            <Link
-              href="/connexion"
-              className="text-primary font-medium underline-offset-4 hover:underline"
-            >
-              Se connecter
-            </Link>
-          </p>
         </form>
       </CardContent>
     </Card>
