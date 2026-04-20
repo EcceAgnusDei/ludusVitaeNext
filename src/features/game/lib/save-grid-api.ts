@@ -1,3 +1,5 @@
+import { GRIDS_NETWORK_ERROR_MESSAGE } from "@/lib/grids-client-errors";
+
 import type { SaveGridApiBody } from "./build-save-grid-payload";
 
 export type PostSaveGridResult = { ok: true } | { ok: false; error: string };
@@ -41,9 +43,6 @@ export async function postSaveGrid(
 
     return { ok: true };
   } catch {
-    return {
-      ok: false,
-      error: "Impossible de joindre le serveur. Vérifiez votre connexion.",
-    };
+    return { ok: false, error: GRIDS_NETWORK_ERROR_MESSAGE };
   }
 }

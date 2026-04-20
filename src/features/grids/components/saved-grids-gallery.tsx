@@ -9,6 +9,11 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { PLAY_GRID_SESSION_STORAGE_KEY } from "@/features/game/lib/play-navigation-payload";
 
+import {
+  GRIDS_NETWORK_ERROR_MESSAGE,
+  messageFromGridsErrorResponse,
+} from "@/lib/grids-client-errors";
+
 import { DeleteGridDialog } from "./delete-grid-dialog";
 import { GridThumbnail } from "./grid-thumbnail";
 import type { SavedGrid } from "@/features/grids/lib/saved-grid";
@@ -57,6 +62,8 @@ function GridCardToolbar({
   const [visibilityPending, setVisibilityPending] = useState(false);
   const [deletePending, setDeletePending] = useState(false);
   const [deleteGridDialogOpen, setDeleteGridDialogOpen] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [cardActionError, setCardActionError] = useState<string | null>(null);
 
   useEffect(() => {
     setIsPublic(isPublicInitial);
@@ -75,13 +82,17 @@ function GridCardToolbar({
   const toggleLike = async () => {
     if (likePending) return;
     setLikePending(true);
+    setCardActionError(null);
     try {
       const method = liked ? "DELETE" : "POST";
       const res = await fetch(
         `/api/grids/${encodeURIComponent(gridId)}/like`,
         { method, credentials: "include" },
       );
-      if (!res.ok) return;
+      if (!res.ok) {
+        setCardActionError(await messageFromGridsErrorResponse(res));
+        return;
+      }
       const body = (await res.json()) as {
         liked?: unknown;
         likeCount?: unknown;
@@ -93,6 +104,8 @@ function GridCardToolbar({
         setLiked(body.liked);
         setLikeCount(body.likeCount);
       }
+    } catch {
+      setCardActionError(GRIDS_NETWORK_ERROR_MESSAGE);
     } finally {
       setLikePending(false);
     }
@@ -101,16 +114,21 @@ function GridCardToolbar({
   const deleteGrid = async () => {
     if (deletePending) return;
     setDeletePending(true);
+    setDeleteError(null);
     try {
       const res = await fetch(`/api/grids/${encodeURIComponent(gridId)}`, {
         method: "DELETE",
         credentials: "include",
       });
-      if (!res.ok) return;
+      if (!res.ok) {
+        setDeleteError(await messageFromGridsErrorResponse(res));
+        return;
+      }
       setDeleteGridDialogOpen(false);
+      setDeleteError(null);
       onRemoved?.();
     } catch {
-      /* ignore */
+      setDeleteError(GRIDS_NETWORK_ERROR_MESSAGE);
     } finally {
       setDeletePending(false);
     }
@@ -120,6 +138,7 @@ function GridCardToolbar({
     if (visibilityPending) return;
     const next = !isPublic;
     setVisibilityPending(true);
+    setCardActionError(null);
     try {
       const res = await fetch(`/api/grids/${encodeURIComponent(gridId)}`, {
         method: "PATCH",
@@ -128,27 +147,13 @@ function GridCardToolbar({
         body: JSON.stringify({ isPublic: next }),
       });
       if (!res.ok) {
-        let detail = "";
-        try {
-          const text = await res.text();
-          if (text) {
-            const parsed = JSON.parse(text) as { error?: unknown };
-            if (typeof parsed.error === "string") detail = parsed.error;
-          }
-        } catch {
-          /* ignore */
-        }
-        console.error(
-          "Visibilité grille : échec API",
-          res.status,
-          detail || "(pas de détail)",
-        );
+        setCardActionError(await messageFromGridsErrorResponse(res));
         return;
       }
       setIsPublic(next);
       onVisibilityUpdated?.(next);
     } catch {
-      /* ignore */
+      setCardActionError(GRIDS_NETWORK_ERROR_MESSAGE);
     } finally {
       setVisibilityPending(false);
     }
@@ -186,16 +191,23 @@ function GridCardToolbar({
               className="pointer-events-auto border border-border/80 bg-background/90 shadow-sm backdrop-blur-sm"
               disabled={deletePending}
               aria-label="Supprimer cette grille"
-              onClick={() => setDeleteGridDialogOpen(true)}
+              onClick={() => {
+                setDeleteError(null);
+                setDeleteGridDialogOpen(true);
+              }}
             >
               <Trash2 className="size-4" aria-hidden />
             </Button>
             <DeleteGridDialog
               open={deleteGridDialogOpen}
-              onOpenChange={setDeleteGridDialogOpen}
+              onOpenChange={(open) => {
+                setDeleteGridDialogOpen(open);
+                if (!open) setDeleteError(null);
+              }}
               title="Supprimer cette grille ?"
               description="Cette action est irréversible. La grille sera définitivement supprimée."
               pending={deletePending}
+              error={deleteError}
               onConfirm={() => void deleteGrid()}
             />
           </>
@@ -230,6 +242,14 @@ function GridCardToolbar({
           </>
         ) : null}
       </div>
+      {cardActionError ? (
+        <p
+          className="text-destructive z-[1] w-full max-w-full px-1 text-center text-xs"
+          role="alert"
+        >
+          {cardActionError}
+        </p>
+      ) : null}
     </>
   );
 }
