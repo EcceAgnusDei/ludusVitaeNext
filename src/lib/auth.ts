@@ -1,7 +1,9 @@
 import { betterAuth } from "better-auth";
 import { APIError } from "better-auth/api";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { i18n } from "@better-auth/i18n";
 import { nextCookies } from "better-auth/next-js";
+import { betterAuthFrMessages } from "@/lib/better-auth-fr-translations";
 import { sql } from "drizzle-orm";
 import { account, session, user, verification } from "@/db/schema";
 import { getDb } from "@/db";
@@ -96,5 +98,16 @@ export const auth = betterAuth({
       },
     },
   },
-  plugins: [nextCookies()],
+  plugins: [
+    nextCookies(),
+    i18n({
+      defaultLocale: "fr",
+      detection: ["header", "cookie"],
+      translations: {
+        fr: betterAuthFrMessages,
+        /** Laisse les messages anglais d’origine pour les navigateurs en `en`. */
+        en: {},
+      },
+    }),
+  ],
 });

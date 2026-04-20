@@ -1,3 +1,6 @@
+/**Pour la traduction des messages d'erreur better auth en français*/
+import { i18nClient } from "@better-auth/i18n/client";
+
 import { createAuthClient } from "better-auth/react";
 
 /** Origine de l’app (sans slash final), alignée avec `resolveBaseURL()` côté serveur. */
@@ -10,4 +13,5 @@ function resolveAuthClientOrigin(): string {
 
 export const authClient = createAuthClient({
   baseURL: resolveAuthClientOrigin(),
+  plugins: [i18nClient()],
 });
