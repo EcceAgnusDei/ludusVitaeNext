@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Gaudium de Veritate — Jeu de la vie
 
-## Getting Started
+Application web (Next.js) autour d’un **automate cellulaire** inspiré du [Jeu de la vie de Conway](https://fr.wikipedia.org/wiki/Jeu_de_la_vie) : dessiner une grille, lancer la simulation, enregistrer et parcourir des créations partagées.
 
-First, run the development server:
+## Fonctionnalités
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Grille interactive** : édition et pas à pas de la simulation.
+- **Sauvegarde** : grilles persistées côté serveur pour les comptes connectés.
+- **Comptes** : inscription, connexion et réinitialisation de mot de passe (e-mails transactionnels via Resend).
+- **Espace personnel** : grilles récentes, populaires, favoris.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Prérequis
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Node.js** 20+ (recommandé : aligné sur les `@types/node` du dépôt).
+- **PostgreSQL** accessible via une URL de connexion (`DATABASE_URL`).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Installation et lancement
 
-## Learn More
+1. **Cloner** le dépôt et se placer à la racine du projet.
 
-To learn more about Next.js, take a look at the following resources:
+2. **Installer les dépendances** :
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   ```bash
+   npm install
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. **Variables d’environnement** : copier `.env.example` vers `.env` et affecter les valeurs correspondantes.
 
-## Deploy on Vercel
+4. **Schéma base de données** : avec une base vide, appliquer les migrations Drizzle (fichiers SQL dans `./drizzle`) :
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+   ```bash
+   npm run db:migrate
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+   Pour un prototypage rapide sans fichier de migration, vous pouvez utiliser `npm run db:push` (voir la doc Drizzle — à réserver au dev).
+
+5. **Lancer le serveur de développement** :
+
+   ```bash
+   npm run dev
+   ```
+
+## Structure du dépôt
+
+- `src/app/` — routes App Router, layouts, pages et routes API (`api/…`).
+- `src/features/` — regroupement par domaine (jeu, grilles, composants liés).
+- `src/components/` — composants partagés (en-tête, pied de page, auth, UI).
+- `src/db/` — schéma Drizzle, client DB et relations.
+- `src/lib/` — auth Better Auth, utilitaires, client API grilles, métadonnées du site.
+- `drizzle/` — migrations SQL générées par Drizzle Kit.
+
+## Scripts npm (base de données)
+
+| Script                  | Description                                                                          |
+| ----------------------- | ------------------------------------------------------------------------------------ |
+| `npm run db:generate`   | Génère des fichiers de migration à partir de `src/db/schema.ts`.                     |
+| `npm run db:introspect` | Introspection du schéma depuis la base existante (Drizzle Kit).                      |
+| `npm run db:migrate`    | Applique les migrations SQL sur `DATABASE_URL`.                                      |
+| `npm run db:push`       | Pousse le schéma vers la base sans passer par des fichiers de migration (usage dev). |
+| `npm run db:studio`     | Ouvre Drizzle Studio pour explorer les données.                                      |
