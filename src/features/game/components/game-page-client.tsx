@@ -219,9 +219,8 @@ export function GamePageClient() {
   };
 
   return (
-    <main
-      id="gamecontainer"
-      className="flex min-h-0 flex-1 flex-col gap-4 p-4 [&_input]:rounded-md [&_input]:border [&_input]:border-border [&_input]:bg-background [&_input]:px-2 [&_input]:py-1 [&_input]:text-sm"
+    <div
+      className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 p-4 [&_input]:rounded-md [&_input]:border [&_input]:border-border [&_input]:bg-background [&_input]:px-2 [&_input]:py-1 [&_input]:text-sm"
     >
       <div
         id="gridcontainer"
@@ -292,6 +291,6 @@ export function GamePageClient() {
         message="La grille a été enregistrée avec succès."
         primaryActionLabel="Fermer"
       />
-    </main>
+    </div>
   );
 }

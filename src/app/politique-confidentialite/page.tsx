@@ -1,14 +1,14 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 
 import { buttonVariants } from "@/components/ui/button";
+import { pageMetadata, siteName } from "@/lib/site-metadata";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = {
-  title: "Politique de confidentialité — Ludus Vitae",
-  description:
-    "Traitement des données personnelles (RGPD, loi Informatique et libertés).",
-};
+export const metadata = pageMetadata({
+  path: "/politique-confidentialite",
+  titleSegment: "Politique de confidentialité",
+  description: `Traitement des données personnelles sur ${siteName} (RGPD, loi Informatique et libertés).`,
+});
 
 /**
  * Personne qui détermine les finalités et les moyens du traitement (RGPD).

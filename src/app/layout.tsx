@@ -2,6 +2,12 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import {
+  getSiteOrigin,
+  siteDefaultDescription,
+  siteMainTitle,
+  siteName,
+} from "@/lib/site-metadata";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,8 +21,29 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Ludus Vitae",
-  description: "Next.js stack for Ludus Vitae",
+  metadataBase: new URL(getSiteOrigin()),
+  title: {
+    default: siteMainTitle,
+    template: `${siteMainTitle} | %s`,
+  },
+  description: siteDefaultDescription,
+  applicationName: siteMainTitle,
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    siteName,
+    title: siteMainTitle,
+    description: siteDefaultDescription,
+  },
+  twitter: {
+    card: "summary",
+    title: siteMainTitle,
+    description: siteDefaultDescription,
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({

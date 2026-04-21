@@ -1,11 +1,12 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
-  title: "Mentions légales — Ludus Vitae",
-  description:
-    "Informations LCEN : éditeur, hébergeur du site et hébergement des données.",
-};
+import { pageMetadata, siteName } from "@/lib/site-metadata";
+
+export const metadata = pageMetadata({
+  path: "/mentions-legales",
+  titleSegment: "Mentions légales",
+  description: `Informations LCEN : éditeur, hébergeur du site et hébergement des données — ${siteName}.`,
+});
 
 /**
  * Renseignez ces champs pour vos mentions légales (LCEN).

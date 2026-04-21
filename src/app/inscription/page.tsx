@@ -1,11 +1,15 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 
 import { SignUpForm } from "@/components/auth/sign-up-form";
+import { pageMetadata } from "@/lib/site-metadata";
 
-export const metadata: Metadata = {
-  title: "Inscription — Ludus Vitae",
-  description: "Créez un compte Ludus Vitae.",
+export const metadata = {
+  ...pageMetadata({
+    path: "/inscription",
+    titleSegment: "Inscription",
+    description: `Créez un compte pour sauvegarder vos créations en ligne et les partager.`,
+  }),
+  robots: { index: false, follow: true },
 };
 
 export default function InscriptionPage() {

@@ -9,24 +9,9 @@ import { useGridsSource } from "../hooks/use-grids-source";
 
 export type GridsExploreVariant = "recent" | "popular";
 
-const VARIANT = {
-  recent: {
-    title: "Récents",
-    description: "Toutes les grilles, de la plus récente à la plus ancienne.",
-  },
-  popular: {
-    title: "Populaires",
-    description: "Grilles les plus appréciées, du plus de likes au moins",
-  },
-} as const satisfies Record<
-  GridsExploreVariant,
-  { title: string; description: string }
->;
-
 export type GridsExploreProps = { variant: GridsExploreVariant };
 
 export function GridsExplore({ variant }: GridsExploreProps) {
-  const { title, description } = VARIANT[variant];
   const sort = variant === "popular" ? "popular" : "recent";
   const { grids, error, loading, loadMore, hasMore } = useGridsSource({
     kind: "explore",
@@ -54,28 +39,21 @@ export function GridsExplore({ variant }: GridsExploreProps) {
 
   if (grids === null) {
     return (
-      <main className="flex w-full min-w-0 flex-1 flex-col items-center justify-center p-6">
+      <div className="flex w-full min-w-0 flex-1 flex-col items-center justify-center p-6">
         {error !== null ? (
           <p className="text-destructive text-sm">{error}</p>
         ) : (
           <p className="text-muted-foreground">Chargement des grilles…</p>
         )}
-      </main>
+      </div>
     );
   }
 
   return (
-    <main
+    <div
       className="flex w-full min-w-0 flex-1 flex-col gap-6 p-6"
       aria-busy={loadingMore}
     >
-      <div className="mx-auto flex w-full max-w-2xl flex-col items-center text-center">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-          <p className="text-muted-foreground mt-1 text-sm">{description}</p>
-        </div>
-      </div>
-
       <SavedGridsGallery
         grids={grids}
         loadError={galleryLoadError}
@@ -85,7 +63,9 @@ export function GridsExplore({ variant }: GridsExploreProps) {
 
       {loadMoreError !== null ? (
         <div className="flex flex-col items-center gap-2 py-2">
-          <p className="text-center text-sm text-destructive">{loadMoreError}</p>
+          <p className="text-center text-sm text-destructive">
+            {loadMoreError}
+          </p>
           <Button
             type="button"
             variant="outline"
@@ -112,6 +92,6 @@ export function GridsExplore({ variant }: GridsExploreProps) {
           aria-hidden
         />
       ) : null}
-    </main>
+    </div>
   );
 }

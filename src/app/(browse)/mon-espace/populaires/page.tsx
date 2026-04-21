@@ -1,10 +1,14 @@
-import type { Metadata } from "next";
-
 import { MonEspaceTabPanel } from "@/features/grids/components/mon-espace-tab-panel";
+import { pageMetadata } from "@/lib/site-metadata";
 
-export const metadata: Metadata = {
-  title: "Mon espace — Populaires | Ludus Vitae",
-  description: "Vos grilles de la plus populaire à la moins populaire.",
+export const metadata = {
+  ...pageMetadata({
+    path: "/mon-espace/populaires",
+    titleSegment: "Vos créations populaires",
+    description:
+      "Vos créations, triées de la plus populaire à la moins populaire.",
+  }),
+  robots: { index: false, follow: true },
 };
 
 export default function MonEspacePopulairesPage() {
