@@ -10,7 +10,7 @@ export const metadata = pageMetadata({
   description: `Traitement des données personnelles sur ${siteName} (RGPD, loi Informatique et libertés).`,
 });
 
-/**
+/*
  * Personne qui détermine les finalités et les moyens du traitement (RGPD).
  * À aligner avec l’éditeur du site (mentions légales).
  */
@@ -21,7 +21,7 @@ const RESPONSABLE = {
   email: "", // idéalement une adresse dédiée type contact-donnees@…
 };
 
-/** Délégué à la protection des données — laisser vide si vous n’en avez pas nommé. */
+/* Délégué à la protection des données — laisser vide si vous n’en avez pas nommé. */
 const DPO = {
   nom: "",
   email: "",

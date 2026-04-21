@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-/**
+/*
  * Réponse 405 homogène pour les verbes HTTP non supportés sur une route grilles.
  * `allow` doit lister les méthodes autorisées (RFC 9110, en-tête `Allow`).
  */

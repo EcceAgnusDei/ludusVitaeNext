@@ -1,4 +1,4 @@
-/**
+/*
  * Traductions FR pour le plugin `@better-auth/i18n`.
  * Clés alignées sur `BASE_ERROR_CODES` (@better-auth/core).
  */

@@ -18,7 +18,7 @@ export const user = pgTable(
     id: text().primaryKey().notNull(),
     name: text().notNull(),
     email: text().notNull(),
-    /** Colonne Better Auth : pas de flux de vérification d’email (reste `false`). */
+    /* Colonne Better Auth : pas de flux de vérification d’email (reste `false`). */
     emailVerified: boolean().notNull(),
     image: text(),
     createdAt: timestamp({ withTimezone: true, mode: "string" })

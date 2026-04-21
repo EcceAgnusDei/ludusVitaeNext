@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 
-/** Chemins où le footer légal reste fixe en bas (listes longues / scroll infini). */
+/* Chemins où le footer légal reste fixe en bas (listes longues / scroll infini). */
 const STICKY_LEGAL_FOOTER_PATHS = new Set([
   "/recents",
   "/populaires",

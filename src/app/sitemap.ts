@@ -8,7 +8,7 @@ function absoluteUrl(path: string): string {
   return `${origin}${pathname}`;
 }
 
-/** Pages indexables : cœur produit + pages légales. Pas d’API, `/mon-espace` ni `/inscription`. */
+/* Pages indexables : cœur produit + pages légales. Pas d’API, `/mon-espace` ni `/inscription`. */
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();
 

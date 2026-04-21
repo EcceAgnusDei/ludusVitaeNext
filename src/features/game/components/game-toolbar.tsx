@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 
-/** Plafond largeur × hauteur : au-delà, trop de nœuds DOM pour rester fluide dans le navigateur. */
+/* Plafond largeur × hauteur : au-delà, trop de nœuds DOM pour rester fluide dans le navigateur. */
 export const MAX_GRID_CELLS = 20_000;
 
 type GameToolbarProps = {

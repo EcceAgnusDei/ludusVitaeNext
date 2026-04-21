@@ -4,12 +4,12 @@ export type SavedGrid = {
   name: string | null;
   data: unknown;
   createdAt: string;
-  /** Absent sur d’anciennes réponses API : considérer comme `true`. */
+  /* Absent sur d’anciennes réponses API : considérer comme `true`. */
   isPublic?: boolean;
-  /** Renseigné par `GET /api/grids/all` (jointure sur `user`). */
+  /* Renseigné par `GET /api/grids/all` (jointure sur `user`). */
   creatorName?: string | null;
-  /** Renseigné par `GET /api/grids/all` (table `grid_like`). */
+  /* Renseigné par `GET /api/grids/all` (table `grid_like`). */
   likeCount?: number;
-  /** Renseigné par `GET /api/grids/all` si l’utilisateur est connecté. */
+  /* Renseigné par `GET /api/grids/all` si l’utilisateur est connecté. */
   likedByMe?: boolean;
 };

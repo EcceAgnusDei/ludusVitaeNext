@@ -1,15 +1,15 @@
-/** Encode une position de grille en clé unique pour les `Set` (`"x,y"`). */
+/* Encode une position de grille en clé unique pour les `Set` (`"x,y"`). */
 export function cellKey(x: number, y: number): string {
   return `${x},${y}`;
 }
 
-/** Décode une clé `"x,y"` en coordonnées entières. */
+/* Décode une clé `"x,y"` en coordonnées entières. */
 export function parseCellKey(key: string): { x: number; y: number } {
   const [xs, ys] = key.split(",");
   return { x: Number(xs), y: Number(ys) };
 }
 
-/** Déplacements relatifs des 8 voisins d’une case (Moore). */
+/* Déplacements relatifs des 8 voisins d’une case (Moore). */
 const NEIGHBOR_OFFSETS: [number, number][] = [
   [-1, -1],
   [0, -1],

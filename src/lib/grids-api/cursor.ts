@@ -1,4 +1,4 @@
-/**
+/*
  * Pagination et curseurs pour l'affichage des grilles.
  */
 
@@ -26,7 +26,7 @@ export type ParseGridsCursorResult =
   | { ok: true; value: GridsCursorPayload | null }
   | { ok: false; reason: "sort_mismatch" | "invalid" };
 
-/**
+/*
  * Vérifie que `obj` a exactement les clés attendues (ni en trop ni en manquante).
  * Sert à rejeter un curseur JSON bidon ou altéré avant usage SQL.
  */
@@ -37,7 +37,7 @@ function hasExactKeySet(obj: object, expected: readonly string[]): boolean {
   return expected.every((k) => set.has(k));
 }
 
-/**
+/*
  * Vérifie que la chaîne ressemble à un UUID (RFC 4122 : variantes 1–5, version dans le 3e groupe).
  * Utilisé pour le champ `i` (id de grille) du curseur avant de le passer en requête SQL.
  */
@@ -47,7 +47,7 @@ function isUuidLike(s: string): boolean {
   );
 }
 
-/**
+/*
  * Sérialise le curseur de pagination en une chaîne base64url pour le paramètre `cursor` de l’URL.
  * Le client renvoie cette valeur telle quelle pour charger la page suivante.
  */
@@ -55,7 +55,7 @@ export function encodeGridsCursor(payload: GridsCursorPayload): string {
   return Buffer.from(JSON.stringify(payload), "utf8").toString("base64url");
 }
 
-/**
+/*
  * Décode et valide `?cursor=` (base64url → JSON) pour la liste paginée.
  * Retourne `null` si absent (première page), un payload typé si valide, ou une erreur
  * (`invalid` / `sort_mismatch` si le tri du curseur ne correspond pas à `expectedSort`).
@@ -152,7 +152,7 @@ export function parseGridsListCursor(
   };
 }
 
-/**
+/*
  * Lit la taille de page depuis la query (`limit`) : entier ≥ 1, plafonné à {@link GRIDS_PAGE_MAX_LIMIT}.
  * Valeur invalide ou absente → {@link GRIDS_PAGE_DEFAULT_LIMIT} (comportement tolérant, comme l’API Express).
  */
@@ -170,7 +170,7 @@ function createdAtToIso(value: string | Date): string {
   return typeof value === "string" ? value : value.toISOString();
 }
 
-/**
+/*
  * Construit le curseur « page suivante » pour un tri par date de création (clé : `createdAt`, puis `id`).
  */
 export function cursorFromRowRecent(row: {
@@ -185,7 +185,7 @@ export function cursorFromRowRecent(row: {
   });
 }
 
-/**
+/*
  * Construit le curseur « page suivante » pour un tri par popularité (clé : nombre de likes, `createdAt`, `id`).
  */
 export function cursorFromRowPopular(row: {

@@ -8,7 +8,7 @@ import { sql } from "drizzle-orm";
 import { account, session, user, verification } from "@/db/schema";
 import { getDb } from "@/db";
 
-/** Unicité du nom affiché à l’inscription uniquement (pas de changement de nom côté app). */
+/* Unicité du nom affiché à l’inscription uniquement (pas de changement de nom côté app). */
 async function assertUniqueUserName(trimmedName: string): Promise<void> {
   if (!trimmedName) return;
   const db = getDb();
@@ -105,7 +105,7 @@ export const auth = betterAuth({
       detection: ["header", "cookie"],
       translations: {
         fr: betterAuthFrMessages,
-        /** Laisse les messages anglais d’origine pour les navigateurs en `en`. */
+        /* Laisse les messages anglais d’origine pour les navigateurs en `en`. */
         en: {},
       },
     }),

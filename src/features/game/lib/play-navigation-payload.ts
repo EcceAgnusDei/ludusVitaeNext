@@ -1,7 +1,7 @@
 import { parseSavedGridData } from "./saved-grid-play";
 import type { GridPlaySnapshot } from "./grid-types";
 
-/**
+/*
  * Clé sessionStorage : à définir avant `router.push("/jeu")` depuis le dashboard
  * (remplace l’état React Router `location.state.savedGridData`).
  */

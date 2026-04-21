@@ -1,8 +1,8 @@
-/** Message affiché quand `fetch` échoue (réseau, serveur arrêté, etc.). */
+/* Message affiché quand `fetch` échoue (réseau, serveur arrêté, etc.). */
 export const GRIDS_NETWORK_ERROR_MESSAGE =
   "Impossible de joindre le serveur. Vérifiez votre connexion.";
 
-/**
+/*
  * Lit le corps JSON `{ error: string }` des réponses `/api/grids/*` en erreur.
  */
 export async function messageFromGridsErrorResponse(

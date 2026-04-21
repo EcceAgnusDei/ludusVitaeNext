@@ -10,7 +10,7 @@ export type PlayGridNavigationEvent =
   | { kind: "invalid" }
   | { kind: "none" };
 
-/**
+/*
  * Une fois au montage : lit et retire le payload sessionStorage quand on ouvre une grille depuis l'extérieur.
  */
 export function usePlayGridPayloadOnMount(
@@ -18,7 +18,7 @@ export function usePlayGridPayloadOnMount(
 ): void {
   const onEventRef = useRef(onEvent);
 
-  /** Pas d’écriture dans `ref.current` pendant le rendu (règle React 19 / compilateur). */
+  /* Pas d’écriture dans `ref.current` pendant le rendu (règle React 19 / compilateur). */
   useLayoutEffect(() => {
     onEventRef.current = onEvent;
   }, [onEvent]);

@@ -19,7 +19,7 @@ export type DeleteGridDialogProps = {
   error?: string | null;
 };
 
-/** Confirmation de suppression de grille. */
+/* Confirmation de suppression de grille. */
 export function DeleteGridDialog({
   cancelLabel = "Annuler",
   confirmLabel = "Supprimer",

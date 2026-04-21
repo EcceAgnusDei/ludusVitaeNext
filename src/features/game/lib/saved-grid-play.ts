@@ -1,6 +1,6 @@
 import type { GridCoord, GridPlaySnapshot } from "./grid-types";
 
-/**
+/*
  * Vérifie que les données de grille (ex. JSON en base) sont valides et les convertit
  * en un objet utilisable par le composant Grid.
  */

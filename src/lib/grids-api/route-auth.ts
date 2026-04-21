@@ -1,4 +1,4 @@
-/**
+/*
  * Authentification pour les Route Handlers `/api/grids/*`.
  *
  * Règles :
@@ -18,7 +18,7 @@ function isNonEmptyUserId(value: unknown): value is string {
   return typeof value === "string" && value.length > 0 && value.length <= 256;
 }
 
-/**
+/*
  * Identifiant du visiteur connecté, ou `null` (anonyme).
  * Ne lit que la session serveur.
  */
@@ -32,7 +32,7 @@ export type RequireUserIdResult =
   | { ok: true; userId: string }
   | { ok: false; response: NextResponse };
 
-/**
+/*
  * Exige une session valide. Utiliser le `userId` retourné pour toute écriture métier
  * (création, suppression, like, etc.) — ne pas prendre d’identité depuis le client.
  */

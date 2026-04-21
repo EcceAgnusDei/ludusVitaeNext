@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
 
-/** Nom du site / marque : éditeur, `og:site_name`, suffixe des onglets (`… | …`). */
+/* Nom du site / marque : éditeur, `og:site_name`, suffixe des onglets (`… | …`). */
 export const siteName = "Gaudium de Veritate";
 
-/** Titre principal du produit : l’automate (type Jeu de la vie de Conway). */
+/* Titre principal du produit : l’automate (type Jeu de la vie de Conway). */
 export const siteMainTitle = "Jeu de la vie";
 
 export const siteDefaultDescription =
   "Automate cellulaire inspiré du Jeu de la vie de Conway : dessinez, simulez des grilles et partagez vos créations avec la communauté.";
 
-/** Titre document (<title>) et Open Graph pour la page d’accueil. */
+/* Titre document (<title>) et Open Graph pour la page d’accueil. */
 export const homeDocumentTitle = `${siteMainTitle} — automate cellulaire`;
 
-/**
+/*
  * Origine publique du site pour `metadataBase` et URLs Open Graph.
  * @see .env.example — `NEXT_PUBLIC_APP_URL`
  */
@@ -24,7 +24,7 @@ export function getSiteOrigin(): string {
   return "http://localhost:3000";
 }
 
-/**
+/*
  * Métadonnées de route : titre segment (complété par le template du layout),
  * description, Open Graph et Twitter alignés sur le partage.
  */
@@ -50,7 +50,7 @@ export function pageMetadata(input: {
   };
 }
 
-/** Accueil : titre complet sans appliquer le template `%s | …` du layout. */
+/* Accueil : titre complet sans appliquer le template `%s | …` du layout. */
 export function homeMetadata(input: {
   title: string;
   description: string;

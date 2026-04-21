@@ -4,7 +4,7 @@ import { siteMainTitle } from "@/lib/site-metadata";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-/**
+/*
  * Bloc de contenu statique (RSC) au-dessus de l’aire de jeu : visible pour les
  * utilisateurs et les crawlers sans exécuter le client du simulateur.
  */

@@ -1,4 +1,4 @@
-/**
+/*
  * Accès base de données (Drizzle) pour les grilles : lecture / écriture uniquement,
  * sans `NextRequest` ni codes HTTP — consommé par les Route Handlers.
  */
@@ -16,7 +16,7 @@ import type {
 
 export type GridsDb = ReturnType<typeof getDb>;
 
-/** Corps JSON d’une grille (aligné sur l’ancienne API Express). */
+/* Corps JSON d’une grille (aligné sur l’ancienne API Express). */
 export type GridJson = {
   id: string;
   userId: string;
@@ -26,14 +26,14 @@ export type GridJson = {
   isPublic: boolean;
 };
 
-/** Liste explorée / aimées : champs sociaux + nom du créateur. */
+/* Liste explorée / aimées : champs sociaux + nom du créateur. */
 export type GridListItemWithCreator = GridJson & {
   creatorName: string;
   likeCount: number;
   likedByMe: boolean;
 };
 
-/** Liste sur le profil d’un utilisateur : pas de `creatorName` côté API historique. */
+/* Liste sur le profil d’un utilisateur : pas de `creatorName` côté API historique. */
 export type GridListItemUser = GridJson & {
   likeCount: number;
   likedByMe: boolean;
@@ -89,7 +89,7 @@ function popularCursorWhere(pop: GridsCursorPopular) {
   )`;
 }
 
-/**
+/*
  * Liste paginée des grilles publiques (explore), avec compteur de likes et « aimé par moi ».
  * `fetchLimit` doit valoir `limit + 1` pour détecter `hasMore` (comportement Express).
  */
@@ -148,7 +148,7 @@ export async function listPublicGridsPage(
     .limit(fetchLimit);
 }
 
-/**
+/*
  * Grilles aimées par l’utilisateur connecté (tri par date du like).
  */
 export async function listLikedGridsForUser(
@@ -175,7 +175,7 @@ export async function listLikedGridsForUser(
     .orderBy(desc(gridLike.createdAt));
 }
 
-/**
+/*
  * Grilles visibles sur le profil `profileUserId` : publiques, ou toutes si le visiteur est le propriétaire.
  */
 export async function listGridsForUserProfile(
@@ -304,7 +304,7 @@ export async function countLikesForGrid(
   return rows[0]?.n ?? 0;
 }
 
-/** Ligne minimale pour décider si un like est autorisé (visibilité). */
+/* Ligne minimale pour décider si un like est autorisé (visibilité). */
 export async function getGridVisibilityRow(
   db: GridsDb,
   gridId: string,
@@ -329,7 +329,7 @@ function isFkViolation(err: unknown): boolean {
   );
 }
 
-/**
+/*
  * Ajoute un like si la grille existe et est visible pour le visiteur.
  * Retourne `not_found` si grille absente / privée d’un autre, ou violation FK.
  */

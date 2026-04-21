@@ -144,7 +144,7 @@ export type ConfirmAlertDialogProps = {
   description: ReactNode;
   onConfirm: () => void | Promise<void>;
   pending?: boolean;
-  /** Si vrai, empêche la fermeture (Annuler, Échap) pendant `pending`. */
+  /* Si vrai, empêche la fermeture (Annuler, Échap) pendant `pending`. */
   blockCloseWhilePending?: boolean;
   cancelLabel?: string;
   confirmLabel?: ReactNode;
@@ -154,7 +154,7 @@ export type ConfirmAlertDialogProps = {
   confirmButtonVariant?: "destructive" | "default";
 };
 
-/**
+/*
  * Modale de confirmation pour actions sensibles (suppression, compte, etc.).
  * S’appuie sur Radix Alert Dialog (`role="alertdialog"`).
  */

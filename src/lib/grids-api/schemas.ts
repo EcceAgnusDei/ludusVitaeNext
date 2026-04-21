@@ -1,4 +1,4 @@
-/**
+/*
  * Validation et parsing des entrées HTTP (query / JSON) pour les grilles.
  */
 
@@ -64,7 +64,7 @@ export type ParsedGridsListQuery = {
 
 export type ParseJsonError = { ok: false; error: string };
 
-/**
+/*
  * Lit un paramètre nommé dans l’URL (`?key=…`) via `URLSearchParams`.
  * Retourne la valeur si elle est non vide ; sinon `undefined` (paramètre absent ou
  * `key=` vide), pour que les parseurs traitent « non fourni » de la même manière partout.
@@ -78,7 +78,7 @@ export function firstQueryValue(
   return v;
 }
 
-/**
+/*
  * Query `GET /api/grids/all` : `sort` obligatoire, `cursor` et `limit` optionnels.
  */
 export function parseGridsAllQuery(
@@ -125,7 +125,7 @@ export function parseGridsAllQuery(
   };
 }
 
-/**
+/*
  * Query `GET /api/grids/user/[userId]` : uniquement `sort`.
  */
 export function parseGridsUserListQuery(
@@ -145,7 +145,7 @@ export function parseGridsUserListQuery(
   return { ok: true, value: { sort: sortParsed.data } };
 }
 
-/**
+/*
  * Corps `POST /api/grids` (création).
  */
 export function parseCreateGridBody(
@@ -158,7 +158,7 @@ export function parseCreateGridBody(
   return { ok: true, value: parsed.data };
 }
 
-/**
+/*
  * Corps `PATCH /api/grids/[id]` pour la visibilité de la grille.
  */
 export function parsePatchGridBody(

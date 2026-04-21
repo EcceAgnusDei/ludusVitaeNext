@@ -1,4 +1,4 @@
-/**
+/*
  * Graphe Drizzle : chaque `foreignKey` de schema.ts doit apparaître ici en
  * `one` / `many` (fields = colonnes FK sur la table courante, references = PK cible).
  *

@@ -8,7 +8,7 @@ export const metadata = pageMetadata({
   description: `Informations LCEN : éditeur, hébergeur du site et hébergement des données — ${siteName}.`,
 });
 
-/**
+/*
  * Renseignez ces champs pour vos mentions légales (LCEN).
  * Site édité par une personne physique, sans personne morale exploitante.
  */
@@ -26,7 +26,7 @@ const HERBERGEUR_SITE = {
   telephone: "",
 };
 
-/**
+/*
  * Si les données traitées via le site (fichiers, base de données, etc.) sont
  * stockées chez un prestataire distinct de l’hébergeur des pages web,
  * indiquez ses coordonnées. Sinon, laissez vide : le bloc affichera que
