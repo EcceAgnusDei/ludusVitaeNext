@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 
 import { authClient } from "@/lib/auth-client";
@@ -18,7 +18,24 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PostAuthRedirect } from "@/components/auth/post-auth-redirect";
+
+function postAuthRedirectPath(to: string): string {
+  if (!to.startsWith("/") || to.startsWith("//")) return "/";
+  return to;
+}
+
+/* Rechargement complet : session (cookies) fiable; évite la course
+ * `router.replace` + `router.refresh` avec l’App Router. */
+function PostAuthRedirect({ to = "/" }: { to?: string }) {
+  useEffect(() => {
+    window.location.assign(postAuthRedirectPath(to));
+  }, [to]);
+  return (
+    <p className="text-muted-foreground text-center text-sm">
+      Redirection en cours…
+    </p>
+  );
+}
 
 const signUpSchema = z.object({
   name: z

@@ -257,7 +257,7 @@ export function SiteHeader() {
       {
         id: "recent",
         kind: "link",
-        name: "Récents",
+        name: "Récentes",
         href: "/recents",
         public: true,
       },
