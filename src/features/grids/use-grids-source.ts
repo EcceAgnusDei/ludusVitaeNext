@@ -8,7 +8,7 @@ import {
   useState,
 } from "react";
 
-import type { SavedGrid } from "@/features/grids/lib/saved-grid";
+import type { SavedGrid } from "./types";
 
 export type GridsSourceSort = "recent" | "popular";
 

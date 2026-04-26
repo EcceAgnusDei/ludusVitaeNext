@@ -2,11 +2,13 @@ import { NextResponse } from "next/server";
 
 import { getDb } from "@/db";
 import { cursorFromRowPopular, cursorFromRowRecent } from "@/lib/grids-api/cursor";
-import { gridsMethodNotAllowed } from "@/lib/grids-api/method-not-allowed";
+import {
+  gridsMethodNotAllowed,
+  withGridsRouteErrors,
+} from "@/lib/grids-api/route-error";
 import { listPublicGridsPage } from "@/lib/grids-api/repository";
 import { parseGridsAllQuery } from "@/lib/grids-api/schemas";
 import { getViewerId } from "@/lib/grids-api/route-auth";
-import { withGridsRouteErrors } from "@/lib/grids-api/route-error";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

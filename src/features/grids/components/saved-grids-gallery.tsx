@@ -16,7 +16,7 @@ import {
 
 import { DeleteGridDialog } from "./delete-grid-dialog";
 import { GridThumbnail } from "./grid-thumbnail";
-import type { SavedGrid } from "@/features/grids/lib/saved-grid";
+import type { SavedGrid } from "@/features/grids/types";
 
 export type SavedGridsGalleryProps = {
   grids: SavedGrid[];

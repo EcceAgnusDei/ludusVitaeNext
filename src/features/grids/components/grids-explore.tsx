@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 
 import { SavedGridsGallery } from "./saved-grids-gallery";
-import { useGridsSource } from "../hooks/use-grids-source";
+import { useGridsSource } from "../use-grids-source";
 
 export type GridsExploreVariant = "recent" | "popular";
 

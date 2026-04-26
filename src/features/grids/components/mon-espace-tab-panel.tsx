@@ -2,7 +2,7 @@
 
 import { authClient } from "@/lib/auth-client";
 
-import { useGridsSource } from "../hooks/use-grids-source";
+import { useGridsSource } from "../use-grids-source";
 import { SavedGridsGallery } from "./saved-grids-gallery";
 
 export type MonEspaceVariant = "recent" | "popular" | "likes";

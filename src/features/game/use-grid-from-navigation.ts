@@ -2,8 +2,8 @@
 
 import { useEffect, useLayoutEffect, useRef } from "react";
 
-import { consumePlayGridPayloadFromSession } from "../lib/play-navigation-payload";
-import type { GridPlaySnapshot } from "../lib/grid-types";
+import { consumePlayGridPayloadFromSession } from "./lib/play-navigation-payload";
+import type { GridPlaySnapshot } from "./lib/grid-types";
 
 export type PlayGridNavigationEvent =
   | { kind: "loaded"; snapshot: GridPlaySnapshot }

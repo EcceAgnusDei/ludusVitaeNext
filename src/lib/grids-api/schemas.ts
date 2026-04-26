@@ -64,11 +64,6 @@ export type ParsedGridsListQuery = {
 
 export type ParseJsonError = { ok: false; error: string };
 
-/*
- * Lit un paramètre nommé dans l’URL (`?key=…`) via `URLSearchParams`.
- * Retourne la valeur si elle est non vide ; sinon `undefined` (paramètre absent ou
- * `key=` vide), pour que les parseurs traitent « non fourni » de la même manière partout.
- */
 export function firstQueryValue(
   searchParams: URLSearchParams,
   key: string,

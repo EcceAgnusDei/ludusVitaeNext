@@ -3,11 +3,13 @@ import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 
 import { getDb } from "@/db";
-import { gridsMethodNotAllowed } from "@/lib/grids-api/method-not-allowed";
 import { createGrid } from "@/lib/grids-api/repository";
 import { parseCreateGridBody } from "@/lib/grids-api/schemas";
 import { requireUserId } from "@/lib/grids-api/route-auth";
-import { withGridsRouteErrors } from "@/lib/grids-api/route-error";
+import {
+  gridsMethodNotAllowed,
+  withGridsRouteErrors,
+} from "@/lib/grids-api/route-error";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

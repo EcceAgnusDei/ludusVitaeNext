@@ -6,7 +6,7 @@ import { Grid, type GridHandle } from "@/features/game/components/grid";
 import { InfoDialog } from "@/components/info-dialog";
 import { authClient } from "@/lib/auth-client";
 
-import { usePlayGridPayloadOnMount } from "../hooks/use-grid-from-navigation";
+import { usePlayGridPayloadOnMount } from "../use-grid-from-navigation";
 import { buildSaveGridApiBody } from "../lib/build-save-grid-payload";
 import {
   loadGridFromLocalStorage,

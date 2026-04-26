@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 
 import { getDb } from "@/db";
-import { gridsMethodNotAllowed } from "@/lib/grids-api/method-not-allowed";
 import { listLikedGridsForUser } from "@/lib/grids-api/repository";
 import { requireUserId } from "@/lib/grids-api/route-auth";
-import { withGridsRouteErrors } from "@/lib/grids-api/route-error";
+import {
+  gridsMethodNotAllowed,
+  withGridsRouteErrors,
+} from "@/lib/grids-api/route-error";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
