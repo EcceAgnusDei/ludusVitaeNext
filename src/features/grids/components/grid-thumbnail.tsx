@@ -5,12 +5,36 @@ import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Grid } from "@/features/game/components/grid-canvas";
 
 const MIN_CELL_PX = 2;
-const THUMB_TARGET_WIDTH_PX = 350;
+const MAX_CELL_PX = 10;
+const THUMB_MAX_HEIGHT_PX = 700;
+const FALLBACK_VIEWPORT_WIDTH_PX = 1280;
 
-function cellSizeForThumbnail(columns: number, slotWidthPx: number): number {
-  const available = slotWidthPx > 0 ? slotWidthPx : THUMB_TARGET_WIDTH_PX;
-  const targetGridWidth = Math.min(THUMB_TARGET_WIDTH_PX, available);
-  return Math.max(MIN_CELL_PX, Math.ceil(targetGridWidth / columns));
+function gridWidthBoundsFromViewport(viewportWidthPx: number): {
+  min: number;
+  max: number;
+} {
+  if (viewportWidthPx < 360) return { min: 100, max: viewportWidthPx };
+  if (viewportWidthPx < 640) return { min: 220, max: 360 };
+  if (viewportWidthPx < 1024) return { min: 280, max: 560 };
+  if (viewportWidthPx < 1280) return { min: 340, max: 700 };
+  return { min: 400, max: 860 };
+}
+
+function cellSizeForThumbnail(
+  columns: number,
+  rows: number,
+  viewportWidthPx: number,
+): number {
+  const safeViewportWidth =
+    viewportWidthPx > 0 ? viewportWidthPx : FALLBACK_VIEWPORT_WIDTH_PX;
+  const bounds = gridWidthBoundsFromViewport(safeViewportWidth);
+  const targetGridWidth = bounds.max;
+  const fromWidth = Math.floor(targetGridWidth / columns);
+  const fromHeight = Math.floor(THUMB_MAX_HEIGHT_PX / rows);
+  return Math.min(
+    MAX_CELL_PX,
+    Math.max(MIN_CELL_PX, Math.min(fromWidth, fromHeight)),
+  );
 }
 
 type ParsedPayload = {
@@ -70,8 +94,15 @@ export function GridThumbnail({
     if (!slot || !parsed) return;
 
     const update = () => {
-      const w = slot.getBoundingClientRect().width;
-      setCellPx(cellSizeForThumbnail(parsed.gridSize.x, w));
+      const viewportWidth =
+        window.visualViewport?.width ?? window.innerWidth ?? 0;
+      setCellPx(
+        cellSizeForThumbnail(
+          parsed.gridSize.x,
+          parsed.gridSize.y,
+          viewportWidth,
+        ),
+      );
     };
 
     update();
@@ -114,14 +145,14 @@ export function GridThumbnail({
   const captionText = caption?.trim();
   const captionBlock =
     captionText != null && captionText.length > 0 ? (
-      <p className="text-foreground w-full max-w-full truncate text-center text-sm font-medium">
+      <p className="text-foreground max-w-full break-words text-center text-sm font-medium whitespace-normal">
         {captionText}
       </p>
     ) : null;
 
   const creatorTrimmed = creatorName?.trim();
   const creatorLine = showCreator ? (
-    <p className="text-muted-foreground w-full max-w-full truncate text-center text-xs">
+    <p className="text-muted-foreground max-w-full break-words text-center text-xs whitespace-normal">
       {creatorTrimmed != null && creatorTrimmed.length > 0
         ? `Par ${creatorTrimmed}`
         : "Créateur inconnu"}
@@ -129,9 +160,9 @@ export function GridThumbnail({
   ) : null;
 
   return (
-    <div className="flex w-full min-w-0 flex-col items-center gap-2">
-      <div ref={slotRef} className="relative w-full min-w-0">
-        <div className="w-full" aria-hidden>
+    <div className="flex w-fit max-w-full min-w-0 flex-col items-center gap-2">
+      <div ref={slotRef} className="relative w-fit max-w-full min-w-0">
+        <div className="w-fit max-w-full overflow-hidden" aria-hidden>
           <div
             className="pointer-events-none mx-auto w-fit max-w-full select-none"
             aria-hidden
@@ -147,10 +178,10 @@ export function GridThumbnail({
         </div>
       </div>
       {showCreator ? (
-        <>
+        <div className="flex min-w-[150px] max-w-[250px] flex-col items-center gap-1">
           {captionBlock}
           {creatorLine}
-        </>
+        </div>
       ) : null}
     </div>
   );

@@ -26,10 +26,10 @@ export type SavedGridsGalleryProps = {
 };
 
 const cardShellClass =
-  "relative flex w-full min-w-0 flex-col items-center gap-2 rounded-md outline-offset-2 transition-transform duration-200 ease-out hover:scale-[1.04]";
+  "relative flex w-fit max-w-full min-w-0 flex-col items-center gap-2 rounded-md outline-offset-2 transition-transform duration-200 ease-out hover:scale-[1.04]";
 
 const cardLinkClass =
-  "flex w-full min-w-0 flex-col items-center gap-2 rounded-md p-1 text-foreground no-underline focus-visible:z-[1] focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring";
+  "flex w-fit max-w-full min-w-0 flex-col items-center gap-2 rounded-md p-1 text-foreground no-underline focus-visible:z-[1] focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring";
 
 function savedGridIsPublic(g: Pick<SavedGrid, "isPublic">): boolean {
   return g.isPublic !== false;
@@ -85,10 +85,10 @@ function GridCardToolbar({
     setCardActionError(null);
     try {
       const method = liked ? "DELETE" : "POST";
-      const res = await fetch(
-        `/api/grids/${encodeURIComponent(gridId)}/like`,
-        { method, credentials: "include" },
-      );
+      const res = await fetch(`/api/grids/${encodeURIComponent(gridId)}/like`, {
+        method,
+        credentials: "include",
+      });
       if (!res.ok) {
         setCardActionError(await messageFromGridsErrorResponse(res));
         return;
@@ -256,10 +256,7 @@ function GridCardToolbar({
 
 function stashPlayPayload(data: unknown) {
   try {
-    sessionStorage.setItem(
-      PLAY_GRID_SESSION_STORAGE_KEY,
-      JSON.stringify(data),
-    );
+    sessionStorage.setItem(PLAY_GRID_SESSION_STORAGE_KEY, JSON.stringify(data));
   } catch {
     /* ignore */
   }
@@ -292,7 +289,7 @@ export function SavedGridsGallery({
         <p className="text-muted-foreground text-sm">{emptyMessage}</p>
       ) : null}
 
-      <ul className="grid min-w-0 list-none gap-8 p-0 sm:grid-cols-2 lg:grid-cols-3">
+      <ul className="flex min-w-0 list-none flex-wrap items-center justify-center gap-8 p-0">
         {items.map((g) => {
           const name = g.name?.trim();
           const creator = g.creatorName?.trim();
@@ -307,7 +304,7 @@ export function SavedGridsGallery({
           const isOwner = viewerUserId != null && g.userId === viewerUserId;
 
           return (
-            <li key={g.id} className={cardShellClass}>
+            <li key={g.id} className={`${cardShellClass} shrink-0`}>
               <Link
                 href="/jeu"
                 className={cardLinkClass}
@@ -322,9 +319,11 @@ export function SavedGridsGallery({
                   creatorName={g.creatorName}
                 />
                 {!showCreator && name ? (
-                  <p className="text-foreground w-full max-w-full truncate text-center text-sm font-medium">
-                    {name}
-                  </p>
+                  <div className="min-w-[150px] max-w-full">
+                    <p className="text-foreground max-w-full break-words text-center text-sm font-medium whitespace-normal">
+                      {name}
+                    </p>
+                  </div>
                 ) : null}
               </Link>
               <GridCardToolbar

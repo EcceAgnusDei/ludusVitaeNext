@@ -33,7 +33,7 @@ export function MonEspaceShell({ children }: { children: React.ReactNode }) {
 
   if (sessionPending) {
     return (
-      <main className="flex w-full min-w-0 flex-1 flex-col items-center justify-center p-6">
+      <main className="flex w-full min-w-0 flex-1 flex-col items-center justify-center p-4 sm:p-6">
         <p className="text-muted-foreground">Chargement…</p>
       </main>
     );
@@ -41,14 +41,14 @@ export function MonEspaceShell({ children }: { children: React.ReactNode }) {
 
   if (!session?.user) {
     return (
-      <main className="flex w-full min-w-0 flex-1 flex-col items-center justify-center p-6">
+      <main className="flex w-full min-w-0 flex-1 flex-col items-center justify-center p-4 sm:p-6">
         <p className="text-muted-foreground">Redirection…</p>
       </main>
     );
   }
 
   return (
-    <main className="flex w-full min-w-0 flex-1 flex-col gap-6 p-6">
+    <main className="flex w-full min-w-0 flex-1 flex-col gap-6 p-4 sm:p-6">
       <div className="mx-auto flex w-full max-w-2xl flex-col items-center gap-6 text-center">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Mon espace</h1>

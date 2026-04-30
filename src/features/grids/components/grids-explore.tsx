@@ -51,7 +51,7 @@ export function GridsExplore({ variant }: GridsExploreProps) {
 
   return (
     <div
-      className="flex w-full min-w-0 flex-1 flex-col gap-6 p-6"
+      className="flex w-full min-w-0 flex-1 flex-col gap-6"
       aria-busy={loadingMore}
     >
       <SavedGridsGallery
