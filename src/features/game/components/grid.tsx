@@ -11,9 +11,9 @@ import {
 } from "react";
 
 import {
-  cellKey,
+  cellIndexToCoord,
   computeNextGeneration,
-  parseCellKey,
+  toCellIndex,
 } from "@/features/game/lib/game-of-life";
 
 import type { GridCoord } from "@/features/game/lib/grid-types";
@@ -42,6 +42,15 @@ type GridProps = {
 const DEFAULT_GRID = { x: 50, y: 30 };
 const DEFAULT_CELL_SIZE = "20px";
 const BASE_INTERVAL_MS = 2000;
+
+function cellKey(x: number, y: number): string {
+  return `${x},${y}`;
+}
+
+function parseCellKey(key: string): { x: number; y: number } {
+  const [xs, ys] = key.split(",");
+  return { x: Number(xs), y: Number(ys) };
+}
 
 function setCellAliveVisual(
   root: HTMLElement,
@@ -142,14 +151,18 @@ export const Grid = forwardRef<GridHandle, GridProps>(function LifeGrid(
 
   const advanceOneGeneration = useCallback(() => {
     const { x: maxX, y: maxY } = gridSizeRef.current;
-    const prev = aliveRef.current;
-    const { born, died } = computeNextGeneration(prev, maxX, maxY);
-    for (const key of died) {
+    const prevIndexed = new Set<number>();
+    for (const key of aliveRef.current) {
       const { x, y } = parseCellKey(key);
+      prevIndexed.add(toCellIndex(x, y, maxX));
+    }
+    const { born, died } = computeNextGeneration(prevIndexed, maxX, maxY);
+    for (const idx of died) {
+      const { x, y } = cellIndexToCoord(idx, maxX);
       kill(x, y);
     }
-    for (const key of born) {
-      const { x, y } = parseCellKey(key);
+    for (const idx of born) {
+      const { x, y } = cellIndexToCoord(idx, maxX);
       giveBirth(x, y);
     }
   }, [kill, giveBirth]);

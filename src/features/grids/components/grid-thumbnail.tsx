@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 
-import { Grid } from "@/features/game/components/grid";
+import { Grid } from "@/features/game/components/grid-canvas";
 
 const MIN_CELL_PX = 2;
 const THUMB_TARGET_WIDTH_PX = 350;

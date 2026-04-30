@@ -1,14 +1,3 @@
-/* Encode une position de grille en clé unique pour les `Set` (`"x,y"`). */
-export function cellKey(x: number, y: number): string {
-  return `${x},${y}`;
-}
-
-/* Décode une clé `"x,y"` en coordonnées entières. */
-export function parseCellKey(key: string): { x: number; y: number } {
-  const [xs, ys] = key.split(",");
-  return { x: Number(xs), y: Number(ys) };
-}
-
 /* Déplacements relatifs des 8 voisins d’une case (Moore). */
 const NEIGHBOR_OFFSETS: [number, number][] = [
   [-1, -1],
@@ -21,76 +10,51 @@ const NEIGHBOR_OFFSETS: [number, number][] = [
   [1, 1],
 ];
 
-function countLiveNeighborsAround(
-  alive: Set<string>,
-  cx: number,
-  cy: number,
-  maxX: number,
-  maxY: number,
-): number {
-  let n = 0;
-  for (const [dx, dy] of NEIGHBOR_OFFSETS) {
-    const i = cx + dx;
-    const j = cy + dy;
-    if (i < 1 || i > maxX || j < 1 || j > maxY) continue;
-    if (alive.has(cellKey(i, j))) n++;
-  }
-  return n;
-}
-
 export type GenerationDelta = {
-  born: Set<string>;
-  died: Set<string>;
+  born: Set<number>;
+  died: Set<number>;
 };
 
+export function toCellIndex(x: number, y: number, maxX: number): number {
+  return (y - 1) * maxX + (x - 1);
+}
+
+export function cellIndexToCoord(
+  idx: number,
+  maxX: number,
+): { x: number; y: number } {
+  return {
+    x: (idx % maxX) + 1,
+    y: Math.floor(idx / maxX) + 1,
+  };
+}
+
 export function computeNextGeneration(
-  currentlyAlive: Set<string>,
+  currentlyAlive: Set<number>,
   maxX: number,
   maxY: number,
 ): GenerationDelta {
-  const died = new Set<string>();
-
-  for (const key of currentlyAlive) {
-    const { x, y } = parseCellKey(key);
-    const liveNeighbors = countLiveNeighborsAround(
-      currentlyAlive,
-      x,
-      y,
-      maxX,
-      maxY,
-    );
-    if (liveNeighbors < 2 || liveNeighbors > 3) {
-      died.add(key);
-    }
-  }
-
-  const deadNeighborsOfLive = new Set<string>();
-  for (const key of currentlyAlive) {
-    const { x: cx, y: cy } = parseCellKey(key);
+  const neighborCounts = new Map<number, number>();
+  for (const idx of currentlyAlive) {
+    const { x, y } = cellIndexToCoord(idx, maxX);
     for (const [dx, dy] of NEIGHBOR_OFFSETS) {
-      const i = cx + dx;
-      const j = cy + dy;
+      const i = x + dx;
+      const j = y + dy;
       if (i < 1 || i > maxX || j < 1 || j > maxY) continue;
-      const neighborKey = cellKey(i, j);
-      if (!currentlyAlive.has(neighborKey)) {
-        deadNeighborsOfLive.add(neighborKey);
-      }
+      const neighborIdx = toCellIndex(i, j, maxX);
+      neighborCounts.set(neighborIdx, (neighborCounts.get(neighborIdx) ?? 0) + 1);
     }
   }
 
-  const born = new Set<string>();
-  for (const key of deadNeighborsOfLive) {
-    const { x, y } = parseCellKey(key);
-    const liveNeighbors = countLiveNeighborsAround(
-      currentlyAlive,
-      x,
-      y,
-      maxX,
-      maxY,
-    );
-    if (liveNeighbors === 3) {
-      born.add(key);
-    }
+  const died = new Set<number>();
+  for (const idx of currentlyAlive) {
+    const liveNeighbors = neighborCounts.get(idx) ?? 0;
+    if (liveNeighbors < 2 || liveNeighbors > 3) died.add(idx);
+  }
+
+  const born = new Set<number>();
+  for (const [idx, liveNeighbors] of neighborCounts) {
+    if (liveNeighbors === 3 && !currentlyAlive.has(idx)) born.add(idx);
   }
 
   return { born, died };

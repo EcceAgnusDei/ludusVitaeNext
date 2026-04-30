@@ -2,7 +2,7 @@
 
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 
-import { Grid, type GridHandle } from "@/features/game/components/grid";
+import { Grid, type GridHandle } from "@/features/game/components/grid-canvas";
 import { InfoDialog } from "@/components/info-dialog";
 import { authClient } from "@/lib/auth-client";
 
