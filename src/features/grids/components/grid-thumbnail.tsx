@@ -143,20 +143,33 @@ export function GridThumbnail({
   }
 
   const captionText = caption?.trim();
-  const captionBlock =
-    captionText != null && captionText.length > 0 ? (
-      <p className="text-foreground max-w-full break-words text-center text-sm font-medium whitespace-normal">
-        {captionText}
-      </p>
-    ) : null;
-
+  const hasCaption = captionText != null && captionText.length > 0;
   const creatorTrimmed = creatorName?.trim();
-  const creatorLine = showCreator ? (
-    <p className="text-muted-foreground max-w-full break-words text-center text-xs whitespace-normal">
-      {creatorTrimmed != null && creatorTrimmed.length > 0
-        ? `Par ${creatorTrimmed}`
-        : "Créateur inconnu"}
-    </p>
+  const creatorText =
+    creatorTrimmed != null && creatorTrimmed.length > 0
+      ? `Par ${creatorTrimmed}`
+      : "Créateur inconnu";
+  const showDetails = hasCaption || showCreator;
+
+  const detailsBlock = showDetails ? (
+    <div
+      className={
+        showCreator
+          ? "flex min-w-[150px] max-w-[250px] flex-col items-center gap-1"
+          : "min-w-[150px] max-w-[250px]"
+      }
+    >
+      {hasCaption ? (
+        <p className="text-foreground max-w-full break-words text-center text-sm font-medium whitespace-normal">
+          {captionText}
+        </p>
+      ) : null}
+      {showCreator ? (
+        <p className="text-muted-foreground max-w-full break-words text-center text-xs whitespace-normal">
+          {creatorText}
+        </p>
+      ) : null}
+    </div>
   ) : null;
 
   return (
@@ -177,12 +190,7 @@ export function GridThumbnail({
           </div>
         </div>
       </div>
-      {showCreator ? (
-        <div className="flex min-w-[150px] max-w-[250px] flex-col items-center gap-1">
-          {captionBlock}
-          {creatorLine}
-        </div>
-      ) : null}
+      {detailsBlock}
     </div>
   );
 }

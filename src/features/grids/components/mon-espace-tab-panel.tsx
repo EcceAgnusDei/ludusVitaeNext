@@ -7,12 +7,6 @@ import { SavedGridsGallery } from "./saved-grids-gallery";
 
 export type MonEspaceVariant = "recent" | "popular" | "likes";
 
-const DESCRIPTIONS: Record<MonEspaceVariant, string> = {
-  recent: "Vos grilles, de la plus récente à la plus ancienne.",
-  popular: "Vos grilles de la plus populaire à la moins populaire.",
-  likes: "Grilles que vous avez aimées.",
-};
-
 const emptyMessages: Record<MonEspaceVariant, string> = {
   recent:
     "Aucune grille enregistrée. Enregistrez-en une depuis la page Jouer.",
@@ -56,16 +50,11 @@ export function MonEspaceTabPanel({ variant }: MonEspaceTabPanelProps) {
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      <p className="text-sm text-muted-foreground text-center">
-        {DESCRIPTIONS[variant]}
-      </p>
-      <SavedGridsGallery
-        grids={grids}
-        loadError={error}
-        emptyMessage={emptyMessages[variant]}
-        showCreator={variant === "likes"}
-      />
-    </div>
+    <SavedGridsGallery
+      grids={grids}
+      loadError={error}
+      emptyMessage={emptyMessages[variant]}
+      showCreator={variant === "likes"}
+    />
   );
 }

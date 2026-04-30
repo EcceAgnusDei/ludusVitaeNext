@@ -289,7 +289,7 @@ export function SavedGridsGallery({
         <p className="text-muted-foreground text-sm">{emptyMessage}</p>
       ) : null}
 
-      <ul className="flex min-w-0 list-none flex-wrap items-center justify-center gap-8 p-0">
+      <ul className="[@media(max-width:359px)]:px-0 flex min-w-0 list-none flex-wrap items-center justify-center gap-8 px-4 py-0 sm:px-6">
         {items.map((g) => {
           const name = g.name?.trim();
           const creator = g.creatorName?.trim();
@@ -314,17 +314,10 @@ export function SavedGridsGallery({
                 <GridThumbnail
                   gridId={g.id}
                   data={g.data}
-                  caption={showCreator ? name : undefined}
+                  caption={name}
                   showCreator={showCreator}
                   creatorName={g.creatorName}
                 />
-                {!showCreator && name ? (
-                  <div className="min-w-[150px] max-w-full">
-                    <p className="text-foreground max-w-full break-words text-center text-sm font-medium whitespace-normal">
-                      {name}
-                    </p>
-                  </div>
-                ) : null}
               </Link>
               <GridCardToolbar
                 gridId={g.id}
