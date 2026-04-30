@@ -14,7 +14,7 @@ export type GridsCursorPopular = {
 };
 export type GridsCursorPayload = GridsCursorRecent | GridsCursorPopular;
 
-export const GRIDS_PAGE_DEFAULT_LIMIT = 10;
+export const GRIDS_PAGE_DEFAULT_LIMIT = 20;
 export const GRIDS_PAGE_MAX_LIMIT = 50;
 
 const GRIDS_CURSOR_B64_MAX_LENGTH = 2048;

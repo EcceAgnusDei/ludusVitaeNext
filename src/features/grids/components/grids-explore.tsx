@@ -31,7 +31,7 @@ export function GridsExplore({ variant }: GridsExploreProps) {
       (entries) => {
         if (entries[0]?.isIntersecting) void loadMore();
       },
-      { root: null, rootMargin: "500px", threshold: 0 },
+      { root: null, rootMargin: "600px", threshold: 0 },
     );
     obs.observe(el);
     return () => obs.disconnect();

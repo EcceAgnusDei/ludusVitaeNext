@@ -19,6 +19,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+const USERNAME_MAX_LENGTH = 50;
+
 function postAuthRedirectPath(to: string): string {
   if (!to.startsWith("/") || to.startsWith("//")) return "/";
   return to;
@@ -41,7 +43,11 @@ const signUpSchema = z.object({
   name: z
     .string()
     .trim()
-    .min(2, "Le nom d'utilisateur doit contenir au moins 2 caractères"),
+    .min(2, "Le nom d'utilisateur doit contenir au moins 2 caractères")
+    .max(
+      USERNAME_MAX_LENGTH,
+      `Le nom d'utilisateur doit contenir au plus ${USERNAME_MAX_LENGTH} caractères`,
+    ),
   email: z.string().email("Adresse email invalide"),
   password: z
     .string()
@@ -129,6 +135,7 @@ export function SignUpForm() {
               placeholder="Jean Dupont"
               autoComplete="username"
               aria-invalid={!!errors.name}
+              maxLength={USERNAME_MAX_LENGTH}
               {...register("name")}
             />
             {errors.name && (

@@ -19,6 +19,7 @@ type GameSaveDbDialogProps = {
   onOpenChange: (open: boolean) => void;
   name: string;
   onNameChange: (value: string) => void;
+  maxNameLength: number;
   isPublic: boolean;
   onIsPublicChange: (value: boolean) => void;
   error: string | null;
@@ -32,6 +33,7 @@ export function GameSaveDbDialog({
   onOpenChange,
   name,
   onNameChange,
+  maxNameLength,
   isPublic,
   onIsPublicChange,
   error,
@@ -56,9 +58,13 @@ export function GameSaveDbDialog({
                 onChange={(e) => onNameChange(e.target.value)}
                 placeholder="Ex. Mon motif préféré"
                 autoComplete="off"
+                maxLength={maxNameLength}
                 className="rounded-md border border-border bg-background px-2 py-2 text-sm"
                 disabled={submitting}
               />
+              <span className="text-xs text-muted-foreground">
+                {name.length}/{maxNameLength}
+              </span>
             </label>
             <div className="mt-4 flex items-center gap-3">
               <button

@@ -18,6 +18,8 @@ import { postSaveGrid } from "../lib/save-grid-api";
 import { GameSaveDbDialog } from "./game-save-db-dialog";
 import { GameToolbar, MAX_GRID_CELLS } from "./game-toolbar";
 
+const GRID_NAME_MAX_LENGTH = 60;
+
 export function GamePageClient() {
   const gridRef = useRef<GridHandle | null>(null);
   const { data: session, isPending: sessionPending } = authClient.useSession();
@@ -195,12 +197,19 @@ export function GamePageClient() {
   const handleSaveToDatabase = async () => {
     const grid = gridRef.current;
     if (!grid) return;
+    const trimmedName = saveDbName.trim();
+    if (trimmedName.length > GRID_NAME_MAX_LENGTH) {
+      setSaveDbError(
+        `Le nom de la grille doit contenir au plus ${GRID_NAME_MAX_LENGTH} caractères.`,
+      );
+      return;
+    }
 
     const body = buildSaveGridApiBody({
       aliveCells: grid.getAliveCellsCoords(),
       gridSize: grid.gridSize,
       cellSize: grid.cellSize,
-      nameTrimmed: saveDbName.trim(),
+      nameTrimmed: trimmedName,
       isPublic: saveDbIsPublic,
     });
 
@@ -219,9 +228,7 @@ export function GamePageClient() {
   };
 
   return (
-    <div
-      className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 p-4 [&_input]:rounded-md [&_input]:border [&_input]:border-border [&_input]:bg-background [&_input]:px-2 [&_input]:py-1 [&_input]:text-sm"
-    >
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 p-4 [&_input]:rounded-md [&_input]:border [&_input]:border-border [&_input]:bg-background [&_input]:px-2 [&_input]:py-1 [&_input]:text-sm">
       <div
         id="gridcontainer"
         className="grid min-h-0 min-w-0 max-w-full flex-1 place-items-center overflow-auto p-2"
@@ -270,9 +277,10 @@ export function GamePageClient() {
         }}
         name={saveDbName}
         onNameChange={(v) => {
-          setSaveDbName(v);
+          setSaveDbName(v.slice(0, GRID_NAME_MAX_LENGTH));
           if (saveDbError) setSaveDbError(null);
         }}
+        maxNameLength={GRID_NAME_MAX_LENGTH}
         isPublic={saveDbIsPublic}
         onIsPublicChange={(v) => {
           setSaveDbIsPublic(v);
