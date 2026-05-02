@@ -16,6 +16,10 @@ type GameToolbarProps = {
   cellSizeInput: string;
   onCellSizeInputChange: (value: string) => void;
   onApplyCellSize: () => void;
+  gridAiPrompt: string;
+  onGridAiPromptChange: (value: string) => void;
+  onGridAiSubmit: () => void;
+  gridAiSubmitting: boolean;
   onSaveLocal: () => void;
   onLoadLocal: () => void;
   showSaveToDb: boolean;
@@ -33,13 +37,17 @@ export function GameToolbar({
   cellSizeInput,
   onCellSizeInputChange,
   onApplyCellSize,
+  gridAiPrompt,
+  onGridAiPromptChange,
+  onGridAiSubmit,
+  gridAiSubmitting,
   onSaveLocal,
   onLoadLocal,
   showSaveToDb,
   onOpenSaveDb,
 }: GameToolbarProps) {
   return (
-    <div className="mx-auto flex max-w-[min(18rem,100%)] flex-col items-center gap-4">
+    <div className="mx-auto flex max-w-[min(22rem,100%)] flex-col items-center gap-4">
       <div className="flex flex-wrap items-center justify-center gap-2">
         <Button type="button" onClick={onPlayToggle}>
           {playing ? "Pause" : "Play"}
@@ -116,6 +124,37 @@ export function GameToolbar({
         <Button type="button" variant="secondary" onClick={onApplyCellSize}>
           Ok
         </Button>
+      </fieldset>
+
+      <fieldset className="flex w-full flex-col gap-2 border-0 p-0">
+        <legend className="text-center text-sm font-medium">
+          Commande IA (démo)
+        </legend>
+        <input
+          type="text"
+          value={gridAiPrompt}
+          onChange={(e) => onGridAiPromptChange(e.target.value)}
+          placeholder="Ex. planeur, vide, ou laissez vide…"
+          aria-label="Instruction pour la grille (démonstration locale)"
+          className="w-full min-w-0"
+          disabled={gridAiSubmitting}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !gridAiSubmitting) onGridAiSubmit();
+          }}
+        />
+        <Button
+          type="button"
+          variant="secondary"
+          disabled={gridAiSubmitting}
+          onClick={onGridAiSubmit}
+          className="w-full"
+        >
+          {gridAiSubmitting ? "…" : "Appliquer"}
+        </Button>
+        <p className="text-center text-xs text-muted-foreground">
+          Réponses simulées : « vide » efface ; « planeur » place un planeur ;
+          autre texte : clignotant horizontal ; champ vide : planeur.
+        </p>
       </fieldset>
 
       <fieldset className="w-full gap-2 border-0 p-0">

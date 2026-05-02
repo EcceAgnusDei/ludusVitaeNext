@@ -12,6 +12,11 @@ import {
   loadGridFromLocalStorage,
   saveGridToLocalStorage,
 } from "../lib/game-local-storage";
+import {
+  applyGridCommand,
+  parseAndValidateGridCommandJson,
+} from "../lib/grid-command";
+import { fakeGridLlmJson } from "../lib/fake-grid-llm";
 import type { GridPlaySnapshot } from "../lib/grid-types";
 import { postSaveGrid } from "../lib/save-grid-api";
 
@@ -41,6 +46,9 @@ export function GamePageClient() {
   const [loadedSnapshot, setLoadedSnapshot] = useState<GridPlaySnapshot | null>(
     null,
   );
+  const [gridAiPrompt, setGridAiPrompt] = useState("");
+  const [gridAiSubmitting, setGridAiSubmitting] = useState(false);
+  const gridAiInFlightRef = useRef(false);
 
   const syncInputsFromGrid = useCallback(() => {
     const grid = gridRef.current;
@@ -194,6 +202,26 @@ export function GamePageClient() {
     setSaveDbOpen(true);
   };
 
+  const handleGridAiSubmit = useCallback(async () => {
+    const grid = gridRef.current;
+    if (!grid || gridAiInFlightRef.current) return;
+    gridAiInFlightRef.current = true;
+    setGridAiSubmitting(true);
+    try {
+      const raw = await fakeGridLlmJson(gridAiPrompt, grid.gridSize);
+      const result = parseAndValidateGridCommandJson(raw, grid.gridSize);
+      if (!result.ok) {
+        setNoticeMessage(result.error);
+        return;
+      }
+      applyGridCommand(grid, result.command);
+      syncInputsFromGrid();
+    } finally {
+      gridAiInFlightRef.current = false;
+      setGridAiSubmitting(false);
+    }
+  }, [gridAiPrompt, syncInputsFromGrid]);
+
   const handleSaveToDatabase = async () => {
     const grid = gridRef.current;
     if (!grid) return;
@@ -256,6 +284,10 @@ export function GamePageClient() {
         cellSizeInput={cellSizeInput}
         onCellSizeInputChange={setCellSizeInput}
         onApplyCellSize={handleApplyCellSize}
+        gridAiPrompt={gridAiPrompt}
+        onGridAiPromptChange={setGridAiPrompt}
+        onGridAiSubmit={handleGridAiSubmit}
+        gridAiSubmitting={gridAiSubmitting}
         onSaveLocal={handleSaveLocal}
         onLoadLocal={handleLoadLocal}
         showSaveToDb={!sessionPending && isLoggedIn}
