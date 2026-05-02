@@ -1,17 +1,12 @@
+import path from "node:path";
 import { randomBytes } from "node:crypto";
 
+import dotenv from "dotenv";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { NextResponse } from "next/server";
 import { Pool } from "pg";
-import {
-  afterAll,
-  beforeAll,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import * as relations from "@/db/relations";
 import * as schema from "@/db/schema";
@@ -33,14 +28,10 @@ import { requireUserId } from "@/lib/grids-api/route-auth";
 
 import { DELETE } from "./route";
 
-const DATABASE_URL_TEST_LOCAL =
-  "postgresql://antoine:password123@localhost:5432/ludusvitae_test";
+dotenv.config({ path: path.resolve(process.cwd(), ".env.test") });
 
 const dbSchema = { ...schema, ...relations };
-const testUrl =
-  process.env.DATABASE_URL_TEST?.trim() ||
-  DATABASE_URL_TEST_LOCAL.trim() ||
-  undefined;
+const testUrl = process.env.DATABASE_URL_TEST?.trim() || undefined;
 
 function deleteRequest(gridId: string): Request {
   return new Request(`http://test.local/api/grids/${gridId}`, {
