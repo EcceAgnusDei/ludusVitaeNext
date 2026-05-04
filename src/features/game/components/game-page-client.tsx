@@ -16,7 +16,10 @@ import {
   applyGridCommand,
   parseAndValidateGridCommandJson,
 } from "../lib/grid-command";
-import { postGridAiCommand } from "../lib/post-grid-ai-command";
+import {
+  GRID_AI_PROMPT_MAX_LENGTH,
+  postGridAiCommand,
+} from "../lib/post-grid-ai-command";
 import type { GridPlaySnapshot } from "../lib/grid-types";
 import { postSaveGrid } from "../lib/save-grid-api";
 
@@ -266,7 +269,7 @@ export function GamePageClient() {
   };
 
   return (
-    <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 p-4 [&_input]:rounded-md [&_input]:border [&_input]:border-border [&_input]:bg-background [&_input]:px-2 [&_input]:py-1 [&_input]:text-sm">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 p-4 [&_input]:rounded-md [&_input]:border [&_input]:border-border [&_input]:bg-background [&_input]:px-2 [&_input]:py-1 [&_input]:text-sm [&_textarea]:rounded-md [&_textarea]:border [&_textarea]:border-border [&_textarea]:bg-background [&_textarea]:px-2 [&_textarea]:py-1 [&_textarea]:text-sm">
       <div
         id="gridcontainer"
         className="grid min-h-0 min-w-0 max-w-full flex-1 place-items-center overflow-auto p-2"
@@ -297,7 +300,9 @@ export function GamePageClient() {
         gridAiEnabled={!sessionPending && isLoggedIn}
         gridAiSessionPending={sessionPending}
         gridAiPrompt={gridAiPrompt}
-        onGridAiPromptChange={setGridAiPrompt}
+        onGridAiPromptChange={(v) =>
+          setGridAiPrompt(v.slice(0, GRID_AI_PROMPT_MAX_LENGTH))
+        }
         onGridAiSubmit={handleGridAiSubmit}
         gridAiSubmitting={gridAiSubmitting}
         onSaveLocal={handleSaveLocal}

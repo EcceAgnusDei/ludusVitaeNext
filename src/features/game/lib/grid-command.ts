@@ -1,11 +1,10 @@
 /* Fonctions de vérification et d'exécution permettant de commander la grille. */
 import { z } from "zod";
 
-import { MAX_GRID_CELLS } from "@/features/game/components/game-toolbar";
-
 import type { GridCoord } from "@/features/game/lib/grid-types";
 
-export const MAX_GRID_TOTAL_CELLS = MAX_GRID_CELLS;
+/* Plafond largeur × hauteur (UI + commandes + API jeu). Importable côté serveur. */
+export const MAX_GRID_CELLS = 20_000;
 
 const gridCoordSchema = z.object({
   x: z.number().int(),
@@ -96,10 +95,10 @@ export function validateGridCommandForGrid(
         };
       }
       const total = width * height;
-      if (total > MAX_GRID_TOTAL_CELLS) {
+      if (total > MAX_GRID_CELLS) {
         return {
           ok: false,
-          error: `resize : au plus ${MAX_GRID_TOTAL_CELLS.toLocaleString("fr-FR")} cellules (largeur × hauteur).`,
+          error: `resize : au plus ${MAX_GRID_CELLS.toLocaleString("fr-FR")} cellules (largeur × hauteur).`,
         };
       }
       return { ok: true };
@@ -112,7 +111,7 @@ export function validateGridCommandForGrid(
       if (maxX < 1 || maxY < 1) {
         return { ok: false, error: "Grille actuelle invalide." };
       }
-      const maxCells = Math.min(maxX * maxY, MAX_GRID_TOTAL_CELLS);
+      const maxCells = Math.min(maxX * maxY, MAX_GRID_CELLS);
       if (command.cells.length > maxCells) {
         return {
           ok: false,

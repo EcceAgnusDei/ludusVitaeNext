@@ -3,23 +3,29 @@ import { z } from "zod";
 
 import { fakeGridLlmJson } from "@/features/game/lib/fake-grid-llm";
 import {
-  MAX_GRID_TOTAL_CELLS,
+  MAX_GRID_CELLS,
   parseGridCommandJson,
 } from "@/features/game/lib/grid-command";
+import { GRID_AI_PROMPT_MAX_LENGTH } from "@/features/game/lib/post-grid-ai-command";
 import { requireUserId } from "@/lib/grids-api/route-auth";
 
 export const runtime = "nodejs";
 
 const postBodySchema = z.object({
-  prompt: z.string(),
+  prompt: z
+    .string()
+    .max(
+      GRID_AI_PROMPT_MAX_LENGTH,
+      `Le prompt ne peut pas dépasser ${GRID_AI_PROMPT_MAX_LENGTH.toLocaleString("fr-FR")} caractères.`,
+    ),
   gridSize: z
     .object({
       x: z.number().int().min(1),
       y: z.number().int().min(1),
     })
     .refine(
-      (g) => g.x * g.y <= MAX_GRID_TOTAL_CELLS,
-      `La grille dépasse ${MAX_GRID_TOTAL_CELLS.toLocaleString("fr-FR")} cellules.`,
+      (g) => g.x * g.y <= MAX_GRID_CELLS,
+      `La grille dépasse ${MAX_GRID_CELLS.toLocaleString("fr-FR")} cellules.`,
     ),
 });
 

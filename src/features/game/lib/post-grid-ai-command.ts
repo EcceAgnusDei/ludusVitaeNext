@@ -1,5 +1,8 @@
 import type { GridCoord } from "@/features/game/lib/grid-types";
 
+/** Limite partagée client + route API `POST /api/game/grid-command`. */
+export const GRID_AI_PROMPT_MAX_LENGTH = 2_000;
+
 export type PostGridAiCommandBody = {
   prompt: string;
   gridSize: GridCoord;
@@ -12,6 +15,13 @@ export type PostGridAiCommandResult =
 export async function postGridAiCommand(
   body: PostGridAiCommandBody,
 ): Promise<PostGridAiCommandResult> {
+  if (body.prompt.length > GRID_AI_PROMPT_MAX_LENGTH) {
+    return {
+      ok: false,
+      error: `Le prompt est trop long (max. ${GRID_AI_PROMPT_MAX_LENGTH.toLocaleString("fr-FR")} caractères).`,
+    };
+  }
+
   let res: Response;
   try {
     res = await fetch("/api/game/grid-command", {

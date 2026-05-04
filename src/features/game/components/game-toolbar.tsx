@@ -2,8 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 
-/* Plafond largeur × hauteur : au-delà, trop de nœuds DOM pour rester fluide dans le navigateur. */
-export const MAX_GRID_CELLS = 20_000;
+import { MAX_GRID_CELLS } from "@/features/game/lib/grid-command";
+import { GRID_AI_PROMPT_MAX_LENGTH } from "@/features/game/lib/post-grid-ai-command";
+
+export { MAX_GRID_CELLS };
 
 type GameToolbarProps = {
   playing: boolean;
@@ -135,18 +137,30 @@ export function GameToolbar({
           <legend className="text-center text-sm font-medium">
             Commande IA (démo)
           </legend>
-          <input
-            type="text"
+          <textarea
             value={gridAiPrompt}
             onChange={(e) => onGridAiPromptChange(e.target.value)}
             placeholder="Ex. planeur, vide, ou laissez vide…"
             aria-label="Instruction pour la grille (traitement côté serveur, démo)"
-            className="w-full min-w-0"
+            className="min-h-[7.5rem] w-full min-w-0 resize-y"
+            maxLength={GRID_AI_PROMPT_MAX_LENGTH}
             disabled={gridAiSubmitting}
+            rows={5}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && !gridAiSubmitting) onGridAiSubmit();
+              if (
+                (e.ctrlKey || e.metaKey) &&
+                e.key === "Enter" &&
+                !gridAiSubmitting
+              ) {
+                e.preventDefault();
+                onGridAiSubmit();
+              }
             }}
           />
+          <p className="text-center text-xs text-muted-foreground" aria-live="polite">
+            {gridAiPrompt.length.toLocaleString("fr-FR")} /{" "}
+            {GRID_AI_PROMPT_MAX_LENGTH.toLocaleString("fr-FR")} caractères max.
+          </p>
           <Button
             type="button"
             variant="secondary"
@@ -159,7 +173,7 @@ export function GameToolbar({
           <p className="text-center text-xs text-muted-foreground">
             Envoi au serveur (démo) : « vide » efface ; « planeur » place un
             planeur ; autre texte : clignotant horizontal ; champ vide :
-            planeur.
+            planeur. Raccourci : Ctrl+Entrée (ou ⌘+Entrée) pour appliquer.
           </p>
         </fieldset>
       ) : (
