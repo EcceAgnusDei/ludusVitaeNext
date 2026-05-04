@@ -1,9 +1,11 @@
 /* Fonctions de vérification et d'exécution permettant de commander la grille. */
 import { z } from "zod";
 
+import { MAX_GRID_CELLS } from "@/features/game/components/game-toolbar";
+
 import type { GridCoord } from "@/features/game/lib/grid-types";
 
-const MAX_GRID_TOTAL_CELLS = 20_000; // Doit rester aligné avec `MAX_GRID_CELLS` dans `game-toolbar.tsx`.
+export const MAX_GRID_TOTAL_CELLS = MAX_GRID_CELLS;
 
 const gridCoordSchema = z.object({
   x: z.number().int(),

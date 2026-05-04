@@ -16,6 +16,8 @@ type GameToolbarProps = {
   cellSizeInput: string;
   onCellSizeInputChange: (value: string) => void;
   onApplyCellSize: () => void;
+  gridAiEnabled: boolean;
+  gridAiSessionPending: boolean;
   gridAiPrompt: string;
   onGridAiPromptChange: (value: string) => void;
   onGridAiSubmit: () => void;
@@ -37,6 +39,8 @@ export function GameToolbar({
   cellSizeInput,
   onCellSizeInputChange,
   onApplyCellSize,
+  gridAiEnabled,
+  gridAiSessionPending,
   gridAiPrompt,
   onGridAiPromptChange,
   onGridAiSubmit,
@@ -126,36 +130,45 @@ export function GameToolbar({
         </Button>
       </fieldset>
 
-      <fieldset className="flex w-full flex-col gap-2 border-0 p-0">
-        <legend className="text-center text-sm font-medium">
-          Commande IA (démo)
-        </legend>
-        <input
-          type="text"
-          value={gridAiPrompt}
-          onChange={(e) => onGridAiPromptChange(e.target.value)}
-          placeholder="Ex. planeur, vide, ou laissez vide…"
-          aria-label="Instruction pour la grille (démonstration locale)"
-          className="w-full min-w-0"
-          disabled={gridAiSubmitting}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !gridAiSubmitting) onGridAiSubmit();
-          }}
-        />
-        <Button
-          type="button"
-          variant="secondary"
-          disabled={gridAiSubmitting}
-          onClick={onGridAiSubmit}
-          className="w-full"
-        >
-          {gridAiSubmitting ? "…" : "Appliquer"}
-        </Button>
+      {gridAiEnabled ? (
+        <fieldset className="flex w-full flex-col gap-2 border-0 p-0">
+          <legend className="text-center text-sm font-medium">
+            Commande IA (démo)
+          </legend>
+          <input
+            type="text"
+            value={gridAiPrompt}
+            onChange={(e) => onGridAiPromptChange(e.target.value)}
+            placeholder="Ex. planeur, vide, ou laissez vide…"
+            aria-label="Instruction pour la grille (traitement côté serveur, démo)"
+            className="w-full min-w-0"
+            disabled={gridAiSubmitting}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !gridAiSubmitting) onGridAiSubmit();
+            }}
+          />
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={gridAiSubmitting}
+            onClick={onGridAiSubmit}
+            className="w-full"
+          >
+            {gridAiSubmitting ? "…" : "Appliquer"}
+          </Button>
+          <p className="text-center text-xs text-muted-foreground">
+            Envoi au serveur (démo) : « vide » efface ; « planeur » place un
+            planeur ; autre texte : clignotant horizontal ; champ vide :
+            planeur.
+          </p>
+        </fieldset>
+      ) : (
         <p className="text-center text-xs text-muted-foreground">
-          Réponses simulées : « vide » efface ; « planeur » place un planeur ;
-          autre texte : clignotant horizontal ; champ vide : planeur.
+          {gridAiSessionPending
+            ? "Vérification de la session…"
+            : "Connectez-vous pour utiliser la commande IA (réservée aux comptes connectés)."}
         </p>
-      </fieldset>
+      )}
 
       <fieldset className="w-full gap-2 border-0 p-0">
         <legend className="sr-only">Sauvegarde locale</legend>

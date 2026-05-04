@@ -16,7 +16,7 @@ import {
   applyGridCommand,
   parseAndValidateGridCommandJson,
 } from "../lib/grid-command";
-import { fakeGridLlmJson } from "../lib/fake-grid-llm";
+import { postGridAiCommand } from "../lib/post-grid-ai-command";
 import type { GridPlaySnapshot } from "../lib/grid-types";
 import { postSaveGrid } from "../lib/save-grid-api";
 
@@ -208,8 +208,18 @@ export function GamePageClient() {
     gridAiInFlightRef.current = true;
     setGridAiSubmitting(true);
     try {
-      const raw = await fakeGridLlmJson(gridAiPrompt, grid.gridSize);
-      const result = parseAndValidateGridCommandJson(raw, grid.gridSize);
+      const api = await postGridAiCommand({
+        prompt: gridAiPrompt,
+        gridSize: grid.gridSize,
+      });
+      if (!api.ok) {
+        setNoticeMessage(api.error);
+        return;
+      }
+      const result = parseAndValidateGridCommandJson(
+        api.commandJson,
+        grid.gridSize,
+      );
       if (!result.ok) {
         setNoticeMessage(result.error);
         return;
@@ -284,6 +294,8 @@ export function GamePageClient() {
         cellSizeInput={cellSizeInput}
         onCellSizeInputChange={setCellSizeInput}
         onApplyCellSize={handleApplyCellSize}
+        gridAiEnabled={!sessionPending && isLoggedIn}
+        gridAiSessionPending={sessionPending}
         gridAiPrompt={gridAiPrompt}
         onGridAiPromptChange={setGridAiPrompt}
         onGridAiSubmit={handleGridAiSubmit}

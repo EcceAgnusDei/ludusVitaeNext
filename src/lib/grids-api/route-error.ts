@@ -18,7 +18,6 @@ export function gridsMethodNotAllowed(allow: string): NextResponse {
 
 /*
  * Exécute un handler async ; en cas d’exception, log et renvoie {@link gridsInternalErrorResponse}.
- * Les erreurs métier (400, 404, etc.) restent des `return` explicites dans le callback.
  */
 export async function withGridsRouteErrors(
   run: () => Promise<Response | NextResponse>,

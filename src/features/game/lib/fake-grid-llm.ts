@@ -41,7 +41,8 @@ function horizontalBlinker(grid: GridCoord): GridCoord[] {
 }
 
 /*
- * Remplace plus tard par un appel API : même signature, même JSON renvoyé.
+ * Logique « LLM » factice : appelée par `POST /api/game/grid-command`.
+ * Remplace plus tard par un vrai modèle côté route, en gardant la même sortie JSON.
  */
 export async function fakeGridLlmJson(
   userText: string,
@@ -52,7 +53,10 @@ export async function fakeGridLlmJson(
   const t = userText.trim().toLowerCase();
 
   if (t === "") {
-    return JSON.stringify({ action: "setAlive", cells: centeredGlider(gridSize) });
+    return JSON.stringify({
+      action: "setAlive",
+      cells: centeredGlider(gridSize),
+    });
   }
 
   if (
@@ -65,7 +69,10 @@ export async function fakeGridLlmJson(
   }
 
   if (t.includes("planeur") || t.includes("glider")) {
-    return JSON.stringify({ action: "setAlive", cells: centeredGlider(gridSize) });
+    return JSON.stringify({
+      action: "setAlive",
+      cells: centeredGlider(gridSize),
+    });
   }
 
   return JSON.stringify({
