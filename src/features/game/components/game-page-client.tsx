@@ -214,6 +214,7 @@ export function GamePageClient() {
       const api = await postGridAiCommand({
         prompt: gridAiPrompt,
         gridSize: grid.gridSize,
+        aliveCells: grid.getAliveCellsCoords(),
       });
       if (!api.ok) {
         setNoticeMessage(api.error);

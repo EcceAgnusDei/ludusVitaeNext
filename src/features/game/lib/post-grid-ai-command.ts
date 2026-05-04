@@ -1,11 +1,11 @@
 import type { GridCoord } from "@/features/game/lib/grid-types";
 
-/** Limite partagée client + route API `POST /api/game/grid-command`. */
 export const GRID_AI_PROMPT_MAX_LENGTH = 2_000;
 
 export type PostGridAiCommandBody = {
   prompt: string;
   gridSize: GridCoord;
+  aliveCells: GridCoord[];
 };
 
 export type PostGridAiCommandResult =

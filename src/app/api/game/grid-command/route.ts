@@ -11,23 +11,44 @@ import { requireUserId } from "@/lib/grids-api/route-auth";
 
 export const runtime = "nodejs";
 
-const postBodySchema = z.object({
-  prompt: z
-    .string()
-    .max(
-      GRID_AI_PROMPT_MAX_LENGTH,
-      `Le prompt ne peut pas dépasser ${GRID_AI_PROMPT_MAX_LENGTH.toLocaleString("fr-FR")} caractères.`,
-    ),
-  gridSize: z
-    .object({
-      x: z.number().int().min(1),
-      y: z.number().int().min(1),
-    })
-    .refine(
-      (g) => g.x * g.y <= MAX_GRID_CELLS,
-      `La grille dépasse ${MAX_GRID_CELLS.toLocaleString("fr-FR")} cellules.`,
-    ),
+const gridCoordSchema = z.object({
+  x: z.number().int(),
+  y: z.number().int(),
 });
+
+const postBodySchema = z
+  .object({
+    prompt: z
+      .string()
+      .max(
+        GRID_AI_PROMPT_MAX_LENGTH,
+        `Le prompt ne peut pas dépasser ${GRID_AI_PROMPT_MAX_LENGTH.toLocaleString("fr-FR")} caractères.`,
+      ),
+    gridSize: z
+      .object({
+        x: z.number().int().min(1),
+        y: z.number().int().min(1),
+      })
+      .refine(
+        (g) => g.x * g.y <= MAX_GRID_CELLS,
+        `La grille dépasse ${MAX_GRID_CELLS.toLocaleString("fr-FR")} cellules.`,
+      ),
+    aliveCells: z.array(gridCoordSchema),
+  })
+  .superRefine((data, ctx) => {
+    const { gridSize, aliveCells } = data;
+    for (let i = 0; i < aliveCells.length; i++) {
+      const c = aliveCells[i]!;
+      if (c.x < 1 || c.x > gridSize.x || c.y < 1 || c.y > gridSize.y) {
+        ctx.addIssue({
+          code: "custom",
+          message: `Cellule hors grille : (${c.x}, ${c.y}) ; bornes 1..${gridSize.x} × 1..${gridSize.y}.`,
+          path: ["aliveCells", i],
+        });
+        return;
+      }
+    }
+  });
 
 const methodNotAllowed = () =>
   NextResponse.json({ error: "Méthode non autorisée." }, { status: 405 });
@@ -60,8 +81,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const { prompt, gridSize } = parsed.data;
-  const commandJson = await fakeGridLlmJson(prompt, gridSize);
+  const { prompt, gridSize, aliveCells } = parsed.data;
+  const commandJson = await fakeGridLlmJson(prompt, gridSize, aliveCells);
 
   const cmd = parseGridCommandJson(commandJson);
   if (!cmd.ok) {

@@ -171,9 +171,11 @@ export function GameToolbar({
             {gridAiSubmitting ? "…" : "Appliquer"}
           </Button>
           <p className="text-center text-xs text-muted-foreground">
-            Envoi au serveur (démo) : « vide » efface ; « planeur » place un
-            planeur ; autre texte : clignotant horizontal ; champ vide :
-            planeur. Raccourci : Ctrl+Entrée (ou ⌘+Entrée) pour appliquer.
+            L’état des cellules vivantes est envoyé avec le texte (démo) : «
+            vide » efface ; « planeur » remplace par un planeur ; « garder » /
+            « conserver » garde la configuration ; « ajouter planeur » fusionne
+            avec un planeur ; autre texte : clignotant ; champ vide : planeur.
+            Ctrl+Entrée ou ⌘+Entrée pour appliquer.
           </p>
         </fieldset>
       ) : (

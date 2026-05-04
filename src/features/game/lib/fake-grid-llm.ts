@@ -2,6 +2,19 @@ import type { GridCoord } from "@/features/game/lib/grid-types";
 
 const FAKE_LLM_DELAY_MS = 200;
 
+function dedupeAliveCells(cells: GridCoord[]): GridCoord[] {
+  const seen = new Set<string>();
+  const out: GridCoord[] = [];
+  for (const c of cells) {
+    const k = `${c.x},${c.y}`;
+    if (!seen.has(k)) {
+      seen.add(k);
+      out.push(c);
+    }
+  }
+  return out;
+}
+
 function gliderCells1Based(originX: number, originY: number): GridCoord[] {
   const sx = originX;
   const sy = originY;
@@ -42,15 +55,36 @@ function horizontalBlinker(grid: GridCoord): GridCoord[] {
 
 /*
  * Logique « LLM » factice : appelée par `POST /api/game/grid-command`.
- * Remplace plus tard par un vrai modèle côté route, en gardant la même sortie JSON.
+ * `aliveCells` : état courant (1-based) pour un futur vrai LLM ou les branches démo ci-dessous.
  */
 export async function fakeGridLlmJson(
   userText: string,
   gridSize: GridCoord,
+  aliveCells: GridCoord[] = [],
 ): Promise<string> {
   await new Promise((r) => setTimeout(r, FAKE_LLM_DELAY_MS));
 
   const t = userText.trim().toLowerCase();
+
+  if (t.includes("conserver") || t.includes("garder")) {
+    return JSON.stringify({
+      action: "setAlive",
+      cells: dedupeAliveCells(aliveCells),
+    });
+  }
+
+  if (
+    (t.includes("ajouter") || t.includes("ajoute")) &&
+    (t.includes("planeur") || t.includes("glider"))
+  ) {
+    return JSON.stringify({
+      action: "setAlive",
+      cells: dedupeAliveCells([
+        ...aliveCells,
+        ...centeredGlider(gridSize),
+      ]),
+    });
+  }
 
   if (t === "") {
     return JSON.stringify({
