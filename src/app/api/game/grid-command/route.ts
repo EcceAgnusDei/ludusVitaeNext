@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { fakeGridLlmJson } from "@/features/game/lib/fake-grid-llm";
+import { geminiGridCommandJson } from "@/features/game/lib/gemini-grid-llm";
 import {
   MAX_GRID_CELLS,
-  parseGridCommandJson,
+  parseAndValidateGridCommandBatchJson,
 } from "@/features/game/lib/grid-command";
 import { GRID_AI_PROMPT_MAX_LENGTH } from "@/features/game/lib/post-grid-ai-command";
 import { requireUserId } from "@/lib/grids-api/route-auth";
@@ -82,15 +82,38 @@ export async function POST(request: Request) {
   }
 
   const { prompt, gridSize, aliveCells } = parsed.data;
-  const commandJson = await fakeGridLlmJson(prompt, gridSize, aliveCells);
 
-  const cmd = parseGridCommandJson(commandJson);
-  if (!cmd.ok) {
+  const geminiKey = process.env.GEMINI_API_KEY?.trim();
+  if (!geminiKey) {
     return NextResponse.json(
-      { error: "Réponse de commande invalide côté serveur." },
-      { status: 500 },
+      {
+        error:
+          "Commande IA indisponible : la clé Gemini (GEMINI_API_KEY) n’est pas configurée sur le serveur.",
+      },
+      { status: 503 },
     );
   }
 
-  return NextResponse.json({ commandJson });
+  let commandJson: string;
+  try {
+    commandJson = await geminiGridCommandJson(
+      geminiKey,
+      prompt,
+      gridSize,
+      aliveCells,
+    );
+  } catch {
+    return NextResponse.json(
+      { error: "Le service IA a échoué. Réessayez plus tard." },
+      { status: 502 },
+    );
+  }
+
+  const batch = parseAndValidateGridCommandBatchJson(commandJson, gridSize);
+  if (!batch.ok) {
+    return NextResponse.json({ error: batch.error }, { status: 500 });
+  }
+
+  const normalizedJson = JSON.stringify({ commands: batch.commands });
+  return NextResponse.json({ commandJson: normalizedJson });
 }

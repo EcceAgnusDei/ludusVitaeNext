@@ -13,8 +13,8 @@ import {
   saveGridToLocalStorage,
 } from "../lib/game-local-storage";
 import {
-  applyGridCommand,
-  parseAndValidateGridCommandJson,
+  applyGridCommandBatch,
+  parseAndValidateGridCommandBatchJson,
 } from "../lib/grid-command";
 import {
   GRID_AI_PROMPT_MAX_LENGTH,
@@ -220,7 +220,7 @@ export function GamePageClient() {
         setNoticeMessage(api.error);
         return;
       }
-      const result = parseAndValidateGridCommandJson(
+      const result = parseAndValidateGridCommandBatchJson(
         api.commandJson,
         grid.gridSize,
       );
@@ -228,7 +228,7 @@ export function GamePageClient() {
         setNoticeMessage(result.error);
         return;
       }
-      applyGridCommand(grid, result.command);
+      applyGridCommandBatch(grid, result.commands);
       syncInputsFromGrid();
     } finally {
       gridAiInFlightRef.current = false;

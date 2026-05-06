@@ -1,9 +1,12 @@
-/* Fonctions de vérification et d'exécution permettant de commander la grille. */
+/*
+ * Exports publics :
+ * - parseAndValidateGridCommandBatchJson — parse `{ "commands": [...] }`, normalise l’ordre (resize puis setAlive si les deux), valide resize et setAlive.
+ * - applyGridCommandBatch — applique séquentiellement des commandes déjà validées sur une grille.
+ */
 import { z } from "zod";
 
 import type { GridCoord } from "@/features/game/lib/grid-types";
 
-/* Plafond largeur × hauteur (UI + commandes + API jeu). Importable côté serveur. */
 export const MAX_GRID_CELLS = 20_000;
 
 const gridCoordSchema = z.object({
@@ -11,17 +14,8 @@ const gridCoordSchema = z.object({
   y: z.number().int(),
 });
 
-const clearCommandSchema = z.object({
-  action: z.literal("clear"),
-});
-
 const setAliveCommandSchema = z.object({
   action: z.literal("setAlive"),
-  cells: z.array(gridCoordSchema),
-});
-
-const killCellsCommandSchema = z.object({
-  action: z.literal("killCells"),
   cells: z.array(gridCoordSchema),
 });
 
@@ -31,30 +25,120 @@ const resizeCommandSchema = z.object({
   height: z.number().int(),
 });
 
-export const gridCommandSchema = z.discriminatedUnion("action", [
-  clearCommandSchema,
-  setAliveCommandSchema,
-  killCellsCommandSchema,
+const gridCommandSchema = z.discriminatedUnion("action", [
   resizeCommandSchema,
+  setAliveCommandSchema,
 ]);
 
-export type GridCommand = z.infer<typeof gridCommandSchema>;
+type GridCommand = z.infer<typeof gridCommandSchema>;
 
-export type GridCommandApplier = {
+const gridCommandBatchSchema = z.object({
+  commands: z.array(gridCommandSchema).min(1),
+});
+
+type GridCommandApplier = {
   readonly gridSize: GridCoord;
   getAliveCellsCoords: () => GridCoord[];
   applyAliveCells: (coords: GridCoord[]) => void;
   resize: (value: GridCoord | string) => void;
 };
 
-export type ParseGridCommandResult =
-  | { ok: true; command: GridCommand }
+type ParseGridCommandBatchResult =
+  | { ok: true; commands: GridCommand[] }
   | { ok: false; error: string };
 
-/*
- * Vérifie que la commande passée en JSON est valide.
- */
-export function parseGridCommandJson(raw: string): ParseGridCommandResult {
+function coordKey(c: GridCoord): string {
+  return `${c.x},${c.y}`;
+}
+
+function dedupeCoords(cells: GridCoord[]): GridCoord[] {
+  const seen = new Set<string>();
+  const out: GridCoord[] = [];
+  for (const c of cells) {
+    const k = coordKey(c);
+    if (!seen.has(k)) {
+      seen.add(k);
+      out.push(c);
+    }
+  }
+  return out;
+}
+
+function normalizeGridAiCommandOrder(
+  commands: GridCommand[],
+): ParseGridCommandBatchResult {
+  const resizes = commands.filter((c) => c.action === "resize");
+  const setAlives = commands.filter((c) => c.action === "setAlive");
+  if (resizes.length > 1) {
+    return { ok: false, error: "Une seule commande « resize » est autorisée." };
+  }
+  if (setAlives.length > 1) {
+    return {
+      ok: false,
+      error: "Une seule commande « setAlive » est autorisée.",
+    };
+  }
+  const resize = resizes[0];
+  const setAlive = setAlives[0];
+  const ordered: GridCommand[] = [];
+  if (resize) ordered.push(resize);
+  if (setAlive) ordered.push(setAlive);
+  return { ok: true, commands: ordered };
+}
+
+function validateResize(
+  command: Extract<GridCommand, { action: "resize" }>,
+): { ok: true } | { ok: false; error: string } {
+  const { width, height } = command;
+  if (width < 1 || height < 1) {
+    return {
+      ok: false,
+      error: "resize : largeur et hauteur doivent être ≥ 1.",
+    };
+  }
+  const total = width * height;
+  if (total > MAX_GRID_CELLS) {
+    return {
+      ok: false,
+      error: `resize : au plus ${MAX_GRID_CELLS.toLocaleString("fr-FR")} cellules (largeur × hauteur).`,
+    };
+  }
+  return { ok: true };
+}
+
+function validateSetAliveForGridSize(
+  gridSize: GridCoord,
+  command: Extract<GridCommand, { action: "setAlive" }>,
+): { ok: true } | { ok: false; error: string } {
+  const maxX = gridSize.x;
+  const maxY = gridSize.y;
+  if (maxX < 1 || maxY < 1) {
+    return { ok: false, error: "Grille cible invalide." };
+  }
+  const capacity = Math.min(maxX * maxY, MAX_GRID_CELLS);
+  const cells = dedupeCoords(command.cells);
+  if (cells.length > capacity) {
+    return {
+      ok: false,
+      error: `setAlive : trop de cellules (max ${capacity}).`,
+    };
+  }
+  for (let i = 0; i < cells.length; i++) {
+    const { x, y } = cells[i]!;
+    if (x < 1 || x > maxX || y < 1 || y > maxY) {
+      return {
+        ok: false,
+        error: `setAlive : cellule hors grille (${x}, ${y}) ; bornes 1..${maxX} × 1..${maxY}.`,
+      };
+    }
+  }
+  return { ok: true };
+}
+
+export function parseAndValidateGridCommandBatchJson(
+  raw: string,
+  initialGridSize: GridCoord,
+): ParseGridCommandBatchResult {
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw) as unknown;
@@ -62,127 +146,67 @@ export function parseGridCommandJson(raw: string): ParseGridCommandResult {
     return { ok: false, error: "JSON invalide." };
   }
 
-  const result = gridCommandSchema.safeParse(parsed);
+  const result = gridCommandBatchSchema.safeParse(parsed);
   if (!result.success) {
     const first = result.error.issues[0];
     const msg =
       first && typeof first.message === "string"
         ? first.message
-        : "Commande invalide.";
+        : "Lot de commandes invalide.";
     return { ok: false, error: msg };
   }
 
-  return { ok: true, command: result.data };
-}
+  const ordered = normalizeGridAiCommandOrder(result.data.commands);
+  if (!ordered.ok) return ordered;
 
-/*
- * Vérifie que la commande est réalisable sur la grille actuelle (bornes, plafonds).
- */
-export function validateGridCommandForGrid(
-  command: GridCommand,
-  gridSize: GridCoord,
-): { ok: true } | { ok: false; error: string } {
-  switch (command.action) {
-    case "clear":
-      return { ok: true };
-
-    case "resize": {
-      const { width, height } = command;
-      if (width < 1 || height < 1) {
-        return {
-          ok: false,
-          error: "resize : largeur et hauteur doivent être ≥ 1.",
-        };
-      }
-      const total = width * height;
-      if (total > MAX_GRID_CELLS) {
-        return {
-          ok: false,
-          error: `resize : au plus ${MAX_GRID_CELLS.toLocaleString("fr-FR")} cellules (largeur × hauteur).`,
-        };
-      }
-      return { ok: true };
+  const cmds = ordered.commands;
+  if (cmds.length === 1) {
+    const c = cmds[0]!;
+    if (c.action === "resize") {
+      const r = validateResize(c);
+      if (!r.ok) return { ok: false, error: r.error };
+    } else {
+      const r = validateSetAliveForGridSize(initialGridSize, c);
+      if (!r.ok) return { ok: false, error: r.error };
     }
-
-    case "setAlive":
-    case "killCells": {
-      const maxX = gridSize.x;
-      const maxY = gridSize.y;
-      if (maxX < 1 || maxY < 1) {
-        return { ok: false, error: "Grille actuelle invalide." };
-      }
-      const maxCells = Math.min(maxX * maxY, MAX_GRID_CELLS);
-      if (command.cells.length > maxCells) {
-        return {
-          ok: false,
-          error: `${command.action} : trop de cellules (max ${maxCells}).`,
-        };
-      }
-      for (let i = 0; i < command.cells.length; i++) {
-        const { x, y } = command.cells[i]!;
-        if (x < 1 || x > maxX || y < 1 || y > maxY) {
-          return {
-            ok: false,
-            error: `${command.action} : cellule hors grille (${x}, ${y}) ; bornes 1..${maxX} × 1..${maxY}.`,
-          };
-        }
-      }
-      return { ok: true };
-    }
-
-    default: {
-      const _exhaustive: never = command;
-      return _exhaustive;
-    }
-  }
-}
-
-/*
- * Combine les deux vérifications précédentes.
- */
-export function parseAndValidateGridCommandJson(
-  raw: string,
-  gridSize: GridCoord,
-): ParseGridCommandResult {
-  const parsed = parseGridCommandJson(raw);
-  if (!parsed.ok) return parsed;
-
-  const check = validateGridCommandForGrid(parsed.command, gridSize);
-  if (!check.ok) {
-    return { ok: false, error: check.error };
+    return { ok: true, commands: cmds };
   }
 
-  return parsed;
+  const resize = cmds[0]!;
+  const setAlive = cmds[1]!;
+  if (resize.action !== "resize" || setAlive.action !== "setAlive") {
+    return {
+      ok: false,
+      error:
+        "Avec deux commandes, l’ordre doit être : « resize » puis « setAlive ».",
+    };
+  }
+  const vr = validateResize(resize);
+  if (!vr.ok) return { ok: false, error: vr.error };
+
+  const targetSize: GridCoord = { x: resize.width, y: resize.height };
+  const vs = validateSetAliveForGridSize(targetSize, setAlive);
+  if (!vs.ok) return { ok: false, error: vs.error };
+
+  return { ok: true, commands: cmds };
 }
 
-/*
- * Applique une commande déjà validée pour la grille courante.
- */
-export function applyGridCommand(
+export function applyGridCommandBatch(
   target: GridCommandApplier,
-  command: GridCommand,
+  commands: GridCommand[],
 ): void {
-  switch (command.action) {
-    case "clear":
-      target.applyAliveCells([]);
-      return;
-    case "setAlive":
-      target.applyAliveCells(command.cells);
-      return;
-    case "killCells": {
-      const remove = new Set(command.cells.map((c) => `${c.x},${c.y}`));
-      const next = target
-        .getAliveCellsCoords()
-        .filter((c) => !remove.has(`${c.x},${c.y}`));
-      target.applyAliveCells(next);
-      return;
-    }
-    case "resize":
-      target.resize({ x: command.width, y: command.height });
-      return;
-    default: {
-      const _exhaustive: never = command;
-      return _exhaustive;
+  for (const cmd of commands) {
+    switch (cmd.action) {
+      case "setAlive":
+        target.applyAliveCells(dedupeCoords(cmd.cells));
+        break;
+      case "resize":
+        target.resize({ x: cmd.width, y: cmd.height });
+        break;
+      default: {
+        const _exhaustive: never = cmd;
+        throw new Error(`Commande non gérée: ${JSON.stringify(_exhaustive)}`);
+      }
     }
   }
 }

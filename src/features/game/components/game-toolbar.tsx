@@ -135,13 +135,13 @@ export function GameToolbar({
       {gridAiEnabled ? (
         <fieldset className="flex w-full flex-col gap-2 border-0 p-0">
           <legend className="text-center text-sm font-medium">
-            Commande IA (démo)
+            Commande IA
           </legend>
           <textarea
             value={gridAiPrompt}
             onChange={(e) => onGridAiPromptChange(e.target.value)}
-            placeholder="Ex. planeur, vide, ou laissez vide…"
-            aria-label="Instruction pour la grille (traitement côté serveur, démo)"
+            placeholder="Ex. ajouter un planeur, agrandir la grille, retirer des cellules…"
+            aria-label="Instructions pour manipuler la grille"
             className="min-h-[7.5rem] w-full min-w-0 resize-y"
             maxLength={GRID_AI_PROMPT_MAX_LENGTH}
             disabled={gridAiSubmitting}
@@ -157,10 +157,6 @@ export function GameToolbar({
               }
             }}
           />
-          <p className="text-center text-xs text-muted-foreground" aria-live="polite">
-            {gridAiPrompt.length.toLocaleString("fr-FR")} /{" "}
-            {GRID_AI_PROMPT_MAX_LENGTH.toLocaleString("fr-FR")} caractères max.
-          </p>
           <Button
             type="button"
             variant="secondary"
@@ -170,13 +166,6 @@ export function GameToolbar({
           >
             {gridAiSubmitting ? "…" : "Appliquer"}
           </Button>
-          <p className="text-center text-xs text-muted-foreground">
-            L’état des cellules vivantes est envoyé avec le texte (démo) : «
-            vide » efface ; « planeur » remplace par un planeur ; « garder » /
-            « conserver » garde la configuration ; « ajouter planeur » fusionne
-            avec un planeur ; autre texte : clignotant ; champ vide : planeur.
-            Ctrl+Entrée ou ⌘+Entrée pour appliquer.
-          </p>
         </fieldset>
       ) : (
         <p className="text-center text-xs text-muted-foreground">
