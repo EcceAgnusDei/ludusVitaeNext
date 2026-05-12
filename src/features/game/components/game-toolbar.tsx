@@ -11,6 +11,10 @@ type GameToolbarProps = {
   playing: boolean;
   onPlayToggle: () => void;
   onStep: () => void;
+  canUndo: boolean;
+  canRedo: boolean;
+  onUndo: () => void;
+  onRedo: () => void;
   onSpeedChange: (value: number) => void;
   gridSizeInputs: { x: string; y: string };
   onGridSizeInputChange: (field: "x" | "y", value: string) => void;
@@ -34,6 +38,10 @@ export function GameToolbar({
   playing,
   onPlayToggle,
   onStep,
+  canUndo,
+  canRedo,
+  onUndo,
+  onRedo,
   onSpeedChange,
   gridSizeInputs,
   onGridSizeInputChange,
@@ -71,6 +79,30 @@ export function GameToolbar({
           }
         >
           Suivant
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={playing || !canUndo}
+          onClick={onUndo}
+          title={
+            playing
+              ? "Mettez en pause pour annuler"
+              : "Revenir à l’état précédent (play, pas, chargement, IA)"
+          }
+        >
+          Annuler
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={playing || !canRedo}
+          onClick={onRedo}
+          title={
+            playing ? "Mettez en pause pour refaire" : "Rétablir l’état annulé"
+          }
+        >
+          Refaire
         </Button>
       </div>
 

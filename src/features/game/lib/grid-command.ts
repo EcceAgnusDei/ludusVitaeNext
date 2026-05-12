@@ -1,7 +1,6 @@
 /*
  * Exports publics :
  * - parseAndValidateGridCommandBatchJson — parse `{ "commands": [...] }`, normalise l’ordre (resize puis setAlive si les deux), valide resize et setAlive.
- * - applyGridCommandBatch — applique séquentiellement des commandes déjà validées sur une grille.
  */
 import { z } from "zod";
 
@@ -30,28 +29,21 @@ const gridCommandSchema = z.discriminatedUnion("action", [
   setAliveCommandSchema,
 ]);
 
-type GridCommand = z.infer<typeof gridCommandSchema>;
+export type GridCommand = z.infer<typeof gridCommandSchema>;
 
 const gridCommandBatchSchema = z.object({
   commands: z.array(gridCommandSchema).min(1),
 });
 
-type GridCommandApplier = {
-  readonly gridSize: GridCoord;
-  getAliveCellsCoords: () => GridCoord[];
-  applyAliveCells: (coords: GridCoord[]) => void;
-  resize: (value: GridCoord | string) => void;
-};
-
 type ParseGridCommandBatchResult =
   | { ok: true; commands: GridCommand[] }
   | { ok: false; error: string };
 
-function coordKey(c: GridCoord): string {
+export function coordKey(c: GridCoord): string {
   return `${c.x},${c.y}`;
 }
 
-function dedupeCoords(cells: GridCoord[]): GridCoord[] {
+export function dedupeCoords(cells: GridCoord[]): GridCoord[] {
   const seen = new Set<string>();
   const out: GridCoord[] = [];
   for (const c of cells) {
@@ -189,24 +181,4 @@ export function parseAndValidateGridCommandBatchJson(
   if (!vs.ok) return { ok: false, error: vs.error };
 
   return { ok: true, commands: cmds };
-}
-
-export function applyGridCommandBatch(
-  target: GridCommandApplier,
-  commands: GridCommand[],
-): void {
-  for (const cmd of commands) {
-    switch (cmd.action) {
-      case "setAlive":
-        target.applyAliveCells(dedupeCoords(cmd.cells));
-        break;
-      case "resize":
-        target.resize({ x: cmd.width, y: cmd.height });
-        break;
-      default: {
-        const _exhaustive: never = cmd;
-        throw new Error(`Commande non gérée: ${JSON.stringify(_exhaustive)}`);
-      }
-    }
-  }
 }

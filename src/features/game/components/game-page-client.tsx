@@ -13,15 +13,15 @@ import {
   saveGridToLocalStorage,
 } from "../lib/game-local-storage";
 import {
-  applyGridCommandBatch,
+  dedupeCoords,
   parseAndValidateGridCommandBatchJson,
 } from "../lib/grid-command";
 import {
   GRID_AI_PROMPT_MAX_LENGTH,
   postGridAiCommand,
 } from "../lib/post-grid-ai-command";
-import type { GridPlaySnapshot } from "../lib/grid-types";
 import { postSaveGrid } from "../lib/save-grid-api";
+import { useGridPlayHistorySession } from "../use-grid-play-history-session";
 
 import { GameSaveDbDialog } from "./game-save-db-dialog";
 import { GameToolbar, MAX_GRID_CELLS } from "./game-toolbar";
@@ -45,10 +45,6 @@ export function GamePageClient() {
   const [saveDbSubmitting, setSaveDbSubmitting] = useState(false);
   const [saveDbSuccessOpen, setSaveDbSuccessOpen] = useState(false);
 
-  const [gridInstanceKey, setGridInstanceKey] = useState(0);
-  const [loadedSnapshot, setLoadedSnapshot] = useState<GridPlaySnapshot | null>(
-    null,
-  );
   const [gridAiPrompt, setGridAiPrompt] = useState("");
   const [gridAiSubmitting, setGridAiSubmitting] = useState(false);
   const gridAiInFlightRef = useRef(false);
@@ -66,24 +62,35 @@ export function GamePageClient() {
 
   useLayoutEffect(() => {
     syncInputsFromGrid();
-  }, [gridInstanceKey, syncInputsFromGrid]);
+  }, [syncInputsFromGrid]);
+
+  const {
+    canUndo,
+    canRedo,
+    recordCheckpointBeforeMutation,
+    handleUndo,
+    handleRedo,
+    consumeNavigationSnapshot,
+  } = useGridPlayHistorySession({
+    gridRef,
+    playing,
+    setPlaying,
+    syncInputsFromGrid,
+  });
 
   usePlayGridPayloadOnMount(
-    useCallback((event) => {
-      if (event.kind === "loaded") {
-        setPlaying(false);
-        setLoadedSnapshot({
-          gridSize: event.snapshot.gridSize,
-          aliveCells: event.snapshot.aliveCells,
-          cellSize: event.snapshot.cellSize,
-        });
-        setGridInstanceKey((k) => k + 1);
-        return;
-      }
-      if (event.kind === "invalid") {
-        setNoticeMessage("Données de grille invalides.");
-      }
-    }, []),
+    useCallback(
+      (event) => {
+        if (event.kind === "loaded") {
+          consumeNavigationSnapshot(event.snapshot);
+          return;
+        }
+        if (event.kind === "invalid") {
+          setNoticeMessage("Données de grille invalides.");
+        }
+      },
+      [consumeNavigationSnapshot],
+    ),
   );
 
   const handlePlayToggle = () => {
@@ -93,13 +100,17 @@ export function GamePageClient() {
       grid.pause();
       setPlaying(false);
     } else {
+      recordCheckpointBeforeMutation(grid);
       grid.play();
       setPlaying(true);
     }
   };
 
   const handleStep = () => {
-    gridRef.current?.step();
+    const grid = gridRef.current;
+    if (!grid) return;
+    recordCheckpointBeforeMutation(grid);
+    grid.step();
   };
 
   const handleSpeedChange = (value: number) => {
@@ -175,15 +186,25 @@ export function GamePageClient() {
   };
 
   const handleLoadLocal = () => {
+    const grid = gridRef.current;
+    if (!grid) return;
     try {
       const loaded = loadGridFromLocalStorage();
       if (!loaded) throw new Error("empty");
+      const { x, y } = loaded.gridSize;
+      if (!Number.isInteger(x) || !Number.isInteger(y) || x < 1 || y < 1) {
+        setNoticeMessage(`Grille invalide`);
+        return;
+      }
+      recordCheckpointBeforeMutation(grid);
+      grid.pause();
       setPlaying(false);
-      setLoadedSnapshot({
-        gridSize: loaded.gridSize,
-        aliveCells: loaded.aliveCells,
-      });
-      setGridInstanceKey((k) => k + 1);
+      grid.resize({ x, y });
+      grid.applyAliveCells(loaded.aliveCells);
+      if (loaded.cellSize) {
+        grid.resize(loaded.cellSize);
+      }
+      syncInputsFromGrid();
     } catch {
       setNoticeMessage("Impossible de charger la grille");
     }
@@ -228,13 +249,31 @@ export function GamePageClient() {
         setNoticeMessage(result.error);
         return;
       }
-      applyGridCommandBatch(grid, result.commands);
+      if (result.commands.length > 0) {
+        recordCheckpointBeforeMutation(grid);
+      }
+      for (const cmd of result.commands) {
+        switch (cmd.action) {
+          case "setAlive":
+            grid.applyAliveCells(dedupeCoords(cmd.cells));
+            break;
+          case "resize":
+            grid.resize({ x: cmd.width, y: cmd.height });
+            break;
+          default: {
+            const _exhaustive: never = cmd;
+            throw new Error(
+              `Commande non gérée: ${JSON.stringify(_exhaustive)}`,
+            );
+          }
+        }
+      }
       syncInputsFromGrid();
     } finally {
       gridAiInFlightRef.current = false;
       setGridAiSubmitting(false);
     }
-  }, [gridAiPrompt, syncInputsFromGrid]);
+  }, [gridAiPrompt, syncInputsFromGrid, recordCheckpointBeforeMutation]);
 
   const handleSaveToDatabase = async () => {
     const grid = gridRef.current;
@@ -275,20 +314,17 @@ export function GamePageClient() {
         id="gridcontainer"
         className="grid min-h-0 min-w-0 max-w-full flex-1 place-items-center overflow-auto p-2"
       >
-        <Grid
-          key={gridInstanceKey}
-          ref={gridRef}
-          playable
-          initialGridSize={loadedSnapshot?.gridSize}
-          initialAliveCells={loadedSnapshot?.aliveCells}
-          initialCellSize={loadedSnapshot?.cellSize ?? null}
-        />
+        <Grid ref={gridRef} playable />
       </div>
 
       <GameToolbar
         playing={playing}
         onPlayToggle={handlePlayToggle}
         onStep={handleStep}
+        canUndo={canUndo}
+        canRedo={canRedo}
+        onUndo={handleUndo}
+        onRedo={handleRedo}
         onSpeedChange={handleSpeedChange}
         gridSizeInputs={gridSizeInputs}
         onGridSizeInputChange={(field, value) =>

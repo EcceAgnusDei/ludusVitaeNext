@@ -164,7 +164,12 @@ function paintCell(
   ctx.fillRect(px + inset, py + inset, side, side);
 }
 
-function clearCell(ctx: CanvasRenderingContext2D, idx: number, width: number, cellPx: number) {
+function clearCell(
+  ctx: CanvasRenderingContext2D,
+  idx: number,
+  width: number,
+  cellPx: number,
+) {
   const { x, y } = cellIndexToCoord(idx, width);
   const px = (x - 1) * cellPx;
   const py = (y - 1) * cellPx;
@@ -206,7 +211,10 @@ export const Grid = forwardRef<GridHandle, GridProps>(function GridCanvas(
     () => initialCellSize ?? DEFAULT_CELL_SIZE,
   );
   const [alive, setAlive] = useState<Set<number>>(() =>
-    normalizeAliveToIndexSet(initialAliveCells, initialGridSize ?? DEFAULT_GRID),
+    normalizeAliveToIndexSet(
+      initialAliveCells,
+      initialGridSize ?? DEFAULT_GRID,
+    ),
   );
 
   const [isPlaying, setIsPlaying] = useState(false);
@@ -312,7 +320,12 @@ export const Grid = forwardRef<GridHandle, GridProps>(function GridCanvas(
       const x = Math.floor(localX / cellPx) + 1;
       const y = Math.floor(localY / cellPx) + 1;
 
-      if (x < 1 || x > gridSizeRef.current.x || y < 1 || y > gridSizeRef.current.y) {
+      if (
+        x < 1 ||
+        x > gridSizeRef.current.x ||
+        y < 1 ||
+        y > gridSizeRef.current.y
+      ) {
         return;
       }
       toggleCell(x, y);
@@ -344,12 +357,15 @@ export const Grid = forwardRef<GridHandle, GridProps>(function GridCanvas(
 
   const scheduleNext = useCallback(() => {
     clearTimer();
-    timerRef.current = setTimeout(() => {
-      advanceOneGeneration();
-      if (isPlayingRef.current) {
-        scheduleNext();
-      }
-    }, BASE_INTERVAL_MS / Math.max(1, dividerRef.current));
+    timerRef.current = setTimeout(
+      () => {
+        advanceOneGeneration();
+        if (isPlayingRef.current) {
+          scheduleNext();
+        }
+      },
+      BASE_INTERVAL_MS / Math.max(1, dividerRef.current),
+    );
   }, [advanceOneGeneration, clearTimer]);
 
   useLayoutEffect(() => {
