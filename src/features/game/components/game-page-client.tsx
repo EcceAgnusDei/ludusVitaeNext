@@ -113,6 +113,14 @@ export function GamePageClient() {
     grid.step();
   };
 
+  const handleClear = () => {
+    const grid = gridRef.current;
+    if (!grid) return;
+    if (grid.getAliveCellsCoords().length === 0) return;
+    recordCheckpointBeforeMutation(grid);
+    grid.applyAliveCells([]);
+  };
+
   const handleSpeedChange = (value: number) => {
     gridRef.current?.handleSpeed(value);
   };
@@ -325,6 +333,7 @@ export function GamePageClient() {
         canRedo={canRedo}
         onUndo={handleUndo}
         onRedo={handleRedo}
+        onClearAllLiving={handleClear}
         onSpeedChange={handleSpeedChange}
         gridSizeInputs={gridSizeInputs}
         onGridSizeInputChange={(field, value) =>

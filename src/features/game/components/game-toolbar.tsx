@@ -15,6 +15,7 @@ type GameToolbarProps = {
   canRedo: boolean;
   onUndo: () => void;
   onRedo: () => void;
+  onClearAllLiving: () => void;
   onSpeedChange: (value: number) => void;
   gridSizeInputs: { x: string; y: string };
   onGridSizeInputChange: (field: "x" | "y", value: string) => void;
@@ -42,6 +43,7 @@ export function GameToolbar({
   canRedo,
   onUndo,
   onRedo,
+  onClearAllLiving,
   onSpeedChange,
   gridSizeInputs,
   onGridSizeInputChange,
@@ -103,6 +105,16 @@ export function GameToolbar({
           }
         >
           Refaire
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={playing}
+          onClick={onClearAllLiving}
+          aria-label="Remet à 0"
+          title={playing ? "Mettez en pause pour vider la grille" : "Remet à 0"}
+        >
+          Reset
         </Button>
       </div>
 
