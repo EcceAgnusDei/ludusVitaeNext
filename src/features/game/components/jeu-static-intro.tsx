@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 export function JeuStaticIntro() {
   return (
     <section
+      id="jeu-intro"
       aria-labelledby="jeu-page-title"
       className="border-border shrink-0 border-b px-4 py-5 md:py-6"
     >

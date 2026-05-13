@@ -1,8 +1,10 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 
 import { Grid, type GridHandle } from "@/features/game/components/grid-canvas";
+import { Button } from "@/components/ui/button";
 import { ConfirmAlertDialog } from "@/components/ui/alert-dialog";
 import { InfoDialog } from "@/components/info-dialog";
 import { authClient } from "@/lib/auth-client";
@@ -29,7 +31,11 @@ import { GameToolbar, MAX_GRID_CELLS } from "./game-toolbar";
 
 const GRID_NAME_MAX_LENGTH = 60;
 
-export function GamePageClient() {
+type GamePageClientProps = {
+  children?: ReactNode;
+};
+
+export function GamePageClient({ children }: GamePageClientProps) {
   const gridRef = useRef<GridHandle | null>(null);
   const { data: session, isPending: sessionPending } = authClient.useSession();
   const isLoggedIn = Boolean(session?.user);
@@ -54,6 +60,8 @@ export function GamePageClient() {
   const [gridAiPrompt, setGridAiPrompt] = useState("");
   const [gridAiSubmitting, setGridAiSubmitting] = useState(false);
   const gridAiInFlightRef = useRef(false);
+
+  const [introDismissed, setIntroDismissed] = useState(false);
 
   const syncInputsFromGrid = useCallback(() => {
     const grid = gridRef.current;
@@ -355,6 +363,23 @@ export function GamePageClient() {
 
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 p-4 [&_input]:rounded-md [&_input]:border [&_input]:border-border [&_input]:bg-background [&_input]:px-2 [&_input]:py-1 [&_input]:text-sm [&_textarea]:rounded-md [&_textarea]:border [&_textarea]:border-border [&_textarea]:bg-background [&_textarea]:px-2 [&_textarea]:py-1 [&_textarea]:text-sm">
+      {children != null && !introDismissed && (
+        <div className="relative -mx-4 -mt-4 shrink-0">
+          <div className="pointer-events-none absolute end-0 top-0 z-10 flex justify-end p-2 md:p-3">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="pointer-events-auto text-muted-foreground hover:text-foreground h-8 shrink-0 px-2 text-xs md:text-sm"
+              aria-controls="jeu-intro"
+              onClick={() => setIntroDismissed(true)}
+            >
+              Masquer
+            </Button>
+          </div>
+          {children}
+        </div>
+      )}
       <div
         id="gridcontainer"
         className="grid min-h-0 min-w-0 max-w-full flex-1 place-items-center overflow-auto p-2"

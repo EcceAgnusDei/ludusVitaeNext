@@ -12,8 +12,9 @@ export const metadata = pageMetadata({
 export default function JeuPage() {
   return (
     <main className="flex min-h-0 min-w-0 w-full flex-1 flex-col">
-      <JeuStaticIntro />
-      <GamePageClient />
+      <GamePageClient>
+        <JeuStaticIntro />
+      </GamePageClient>
     </main>
   );
 }
