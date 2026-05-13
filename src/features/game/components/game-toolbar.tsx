@@ -69,192 +69,216 @@ export function GameToolbar({
   updateGridPending,
 }: GameToolbarProps) {
   return (
-    <div className="mx-auto flex max-w-[min(22rem,100%)] flex-col items-center gap-4">
-      <div className="flex flex-wrap items-center justify-center gap-2">
-        <Button type="button" onClick={onPlayToggle}>
-          {playing ? "Pause" : "Play"}
-        </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          disabled={playing}
-          onClick={onStep}
-          aria-label="Avancer d'une génération"
-          title={
-            playing
-              ? "Mettez en pause pour avancer pas à pas"
-              : "Avancer d'une génération"
-          }
-        >
-          Suivant
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          disabled={playing || !canUndo}
-          onClick={onUndo}
-          title={
-            playing
-              ? "Mettez en pause pour annuler"
-              : "Revenir à l’état précédent (play, pas, chargement, IA)"
-          }
-        >
-          Annuler
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          disabled={playing || !canRedo}
-          onClick={onRedo}
-          title={
-            playing ? "Mettez en pause pour refaire" : "Rétablir l’état annulé"
-          }
-        >
-          Refaire
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          disabled={playing}
-          onClick={onClearAllLiving}
-          aria-label="Remet à 0"
-          title={playing ? "Mettez en pause pour vider la grille" : "Remet à 0"}
-        >
-          Reset
-        </Button>
-      </div>
-
-      <label className="flex w-full flex-col gap-1 text-sm">
-        <span className="text-center">Vitesse</span>
-        <input
-          type="range"
-          min={1}
-          max={100}
-          defaultValue={1}
-          className="w-full"
-          onInput={(e) => onSpeedChange(Number(e.currentTarget.value))}
-        />
-      </label>
-
-      <fieldset className="flex w-full flex-col gap-2 border-0 p-0">
-        <legend className="sr-only">Taille de la grille</legend>
-        <div className="flex flex-wrap items-end justify-center gap-2">
-          <input
-            min={1}
-            type="number"
-            value={gridSizeInputs.x}
-            onChange={(e) => onGridSizeInputChange("x", e.target.value)}
-            placeholder="Largeur (colonnes)"
-            aria-label="Largeur de la grille en colonnes"
-            className="w-20 shrink-0"
-          />
-          <input
-            min={1}
-            type="number"
-            value={gridSizeInputs.y}
-            onChange={(e) => onGridSizeInputChange("y", e.target.value)}
-            placeholder="Hauteur (lignes)"
-            aria-label="Hauteur de la grille en lignes"
-            className="w-20 shrink-0"
-          />
-          <Button type="button" variant="secondary" onClick={onApplyGridSize}>
-            Ok
-          </Button>
-        </div>
-        <p className="text-center text-xs text-muted-foreground">
-          Largeur × hauteur ≤ {MAX_GRID_CELLS.toLocaleString("fr-FR")} cellules
-          au total.
-        </p>
-      </fieldset>
-
-      <fieldset className="flex w-full flex-wrap items-end justify-center gap-2 border-0 p-0">
-        <legend className="sr-only">Taille des cellules</legend>
-        <input
-          min={1}
-          type="number"
-          value={cellSizeInput}
-          onChange={(e) => onCellSizeInputChange(e.target.value)}
-          aria-label="Taille d'une cellule en pixels"
-          className="w-20 shrink-0"
-        />
-        <Button type="button" variant="secondary" onClick={onApplyCellSize}>
-          Ok
-        </Button>
-      </fieldset>
-
-      {gridAiEnabled ? (
-        <fieldset className="flex w-full flex-col gap-2 border-0 p-0">
-          <legend className="text-center text-sm font-medium">
-            Commande IA
-          </legend>
-          <textarea
-            value={gridAiPrompt}
-            onChange={(e) => onGridAiPromptChange(e.target.value)}
-            placeholder="Ex. ajouter un planeur, agrandir la grille, retirer des cellules…"
-            aria-label="Instructions pour manipuler la grille"
-            className="min-h-[7.5rem] w-full min-w-0 resize-y"
-            maxLength={GRID_AI_PROMPT_MAX_LENGTH}
-            disabled={gridAiSubmitting}
-            rows={5}
-            onKeyDown={(e) => {
-              if (
-                (e.ctrlKey || e.metaKey) &&
-                e.key === "Enter" &&
-                !gridAiSubmitting
-              ) {
-                e.preventDefault();
-                onGridAiSubmit();
+    <div className="mx-auto flex w-full max-w-[min(28rem,100%)] flex-col gap-4 md:max-w-[min(64rem,100%)] md:flex-row md:items-start md:justify-center md:gap-8">
+      <div className="flex w-full min-w-0 flex-1 flex-col items-center gap-4">
+        <div className="flex w-full flex-col gap-2">
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={playing || !canUndo}
+              onClick={onUndo}
+              title={
+                playing
+                  ? "Mettez en pause pour annuler"
+                  : "Revenir à l’état précédent (play, pas, chargement, IA)"
               }
-            }}
-          />
-          <Button
-            type="button"
-            variant="secondary"
-            disabled={gridAiSubmitting}
-            onClick={onGridAiSubmit}
-            className="w-full"
-          >
-            {gridAiSubmitting ? "…" : "Appliquer"}
-          </Button>
-        </fieldset>
-      ) : (
-        <p className="text-center text-xs text-muted-foreground">
-          {gridAiSessionPending
-            ? "Vérification de la session…"
-            : "Connectez-vous pour utiliser la commande IA (réservée aux comptes connectés)."}
-        </p>
-      )}
+            >
+              Annuler
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={playing || !canRedo}
+              onClick={onRedo}
+              title={
+                playing
+                  ? "Mettez en pause pour refaire"
+                  : "Rétablir l’état annulé"
+              }
+            >
+              Refaire
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={playing}
+              onClick={onClearAllLiving}
+              aria-label="Remet à 0"
+              title={
+                playing ? "Mettez en pause pour vider la grille" : "Remet à 0"
+              }
+            >
+              Reset
+            </Button>
+          </div>
+          <div className="flex w-full flex-wrap items-center justify-center gap-x-3 gap-y-2">
+            <label className="flex min-w-[min(12rem,100%)] max-w-full flex-1 items-center gap-2 text-sm sm:min-w-[14rem]">
+              <span className="shrink-0">Vitesse</span>
+              <input
+                type="range"
+                min={1}
+                max={100}
+                defaultValue={1}
+                className="min-w-0 flex-1"
+                onInput={(e) => onSpeedChange(Number(e.currentTarget.value))}
+              />
+            </label>
+            <Button type="button" onClick={onPlayToggle}>
+              {playing ? "Pause" : "Play"}
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={playing}
+              onClick={onStep}
+              aria-label="Avancer d'une génération"
+              title={
+                playing
+                  ? "Mettez en pause pour avancer pas à pas"
+                  : "Avancer d'une génération"
+              }
+            >
+              Suivant
+            </Button>
+          </div>
+        </div>
 
-      <fieldset className="w-full gap-2 border-0 p-0">
-        <legend className="sr-only">Sauvegarde locale</legend>
-        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-center">
-          <Button type="button" variant="outline" onClick={onSaveLocal}>
-            Sauvegarde rapide
-          </Button>
-          <Button type="button" variant="outline" onClick={onLoadLocal}>
-            Charger
-          </Button>
-          {showSaveToDb ? (
-            <>
-              <Button type="button" variant="default" onClick={onOpenSaveDb}>
-                Enregistrer nouveau
-              </Button>
-              {updateGridId !== null ? (
+        <div className="flex w-full flex-col gap-2">
+          <div className="flex w-full flex-wrap items-end justify-center gap-x-4 gap-y-2">
+            <fieldset className="flex min-w-0 flex-col gap-2 border-0 p-0">
+              <legend className="text-center text-sm font-medium">
+                Taille de la grille (colonnes × lignes)
+              </legend>
+              <div className="flex flex-wrap items-end justify-center gap-2">
+                <input
+                  min={1}
+                  type="number"
+                  value={gridSizeInputs.x}
+                  onChange={(e) => onGridSizeInputChange("x", e.target.value)}
+                  placeholder="Largeur (colonnes)"
+                  aria-label="Largeur de la grille en colonnes"
+                  className="w-20 shrink-0"
+                />
+                <input
+                  min={1}
+                  type="number"
+                  value={gridSizeInputs.y}
+                  onChange={(e) => onGridSizeInputChange("y", e.target.value)}
+                  placeholder="Hauteur (lignes)"
+                  aria-label="Hauteur de la grille en lignes"
+                  className="w-20 shrink-0"
+                />
                 <Button
                   type="button"
                   variant="secondary"
-                  disabled={updateGridPending}
-                  onClick={onUpdateGrid}
+                  onClick={onApplyGridSize}
                 >
-                  {updateGridPending
-                    ? "Mise à jour…"
-                    : "Mettre à jour la grille"}
+                  Ok
                 </Button>
-              ) : null}
-            </>
-          ) : null}
+              </div>
+            </fieldset>
+            <fieldset className="flex min-w-0 flex-col gap-2 border-0 p-0">
+              <legend className="text-center text-sm font-medium">
+                Taille des cellules (px)
+              </legend>
+              <div className="flex flex-wrap items-end justify-center gap-2">
+                <input
+                  min={1}
+                  type="number"
+                  value={cellSizeInput}
+                  onChange={(e) => onCellSizeInputChange(e.target.value)}
+                  aria-label="Taille d'une cellule en pixels"
+                  className="w-20 shrink-0"
+                />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={onApplyCellSize}
+                >
+                  Ok
+                </Button>
+              </div>
+            </fieldset>
+          </div>
         </div>
-      </fieldset>
+
+        <fieldset className="w-full border-0 p-0">
+          <legend className="sr-only">Sauvegarde locale</legend>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <Button type="button" variant="outline" onClick={onSaveLocal}>
+              Sauvegarde rapide
+            </Button>
+            <Button type="button" variant="outline" onClick={onLoadLocal}>
+              Charger
+            </Button>
+            {showSaveToDb ? (
+              <>
+                <Button type="button" variant="default" onClick={onOpenSaveDb}>
+                  Enregistrer nouveau
+                </Button>
+                {updateGridId !== null ? (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    disabled={updateGridPending}
+                    onClick={onUpdateGrid}
+                  >
+                    {updateGridPending
+                      ? "Mise à jour…"
+                      : "Mettre à jour la grille"}
+                  </Button>
+                ) : null}
+              </>
+            ) : null}
+          </div>
+        </fieldset>
+      </div>
+
+      <div className="flex w-full min-w-0 shrink-0 flex-col items-stretch md:w-80">
+        {gridAiEnabled ? (
+          <fieldset className="flex w-full flex-col gap-2 border-0 p-0">
+            <legend className="w-full text-center text-sm font-medium">
+              Commande IA
+            </legend>
+            <textarea
+              value={gridAiPrompt}
+              onChange={(e) => onGridAiPromptChange(e.target.value)}
+              placeholder="Ex. ajouter un planeur, agrandir la grille, retirer des cellules…"
+              aria-label="Instructions pour manipuler la grille"
+              className="min-h-[7.5rem] w-full min-w-0 resize-y"
+              maxLength={GRID_AI_PROMPT_MAX_LENGTH}
+              disabled={gridAiSubmitting}
+              rows={5}
+              onKeyDown={(e) => {
+                if (
+                  (e.ctrlKey || e.metaKey) &&
+                  e.key === "Enter" &&
+                  !gridAiSubmitting
+                ) {
+                  e.preventDefault();
+                  onGridAiSubmit();
+                }
+              }}
+            />
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={gridAiSubmitting}
+              onClick={onGridAiSubmit}
+              className="w-full"
+            >
+              {gridAiSubmitting ? "…" : "Appliquer"}
+            </Button>
+          </fieldset>
+        ) : (
+          <p className="text-center text-xs text-muted-foreground">
+            {gridAiSessionPending
+              ? "Vérification de la session…"
+              : "Connectez-vous pour utiliser la commande IA (réservée aux comptes connectés)."}
+          </p>
+        )}
+      </div>
     </div>
   );
 }

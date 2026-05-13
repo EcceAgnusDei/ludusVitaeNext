@@ -357,7 +357,7 @@ export function SiteHeader() {
             href="/"
             className="font-heading text-foreground rounded-sm text-base font-semibold outline-offset-2 transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:text-lg"
           >
-            Ludus Vitae
+            LudusVitae
           </Link>
         </div>
 
