@@ -2,12 +2,16 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff, Heart, Trash2 } from "lucide-react";
+import { Heart, Trash2 } from "lucide-react";
 
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { PLAY_GRID_SESSION_STORAGE_KEY } from "@/features/game/lib/play-navigation-payload";
+import {
+  PLAY_GRID_SESSION_STORAGE_KEY,
+  PLAY_GRID_UPDATE_GRID_ID_KEY,
+  PLAY_GRID_UPDATE_GRID_LIKE_COUNT_KEY,
+} from "@/features/game/lib/play-navigation-payload";
 
 import {
   GRIDS_NETWORK_ERROR_MESSAGE,
@@ -167,22 +171,12 @@ function GridCardToolbar({
             <Button
               type="button"
               variant="secondary"
-              size="icon-sm"
-              className="pointer-events-auto border border-border/80 bg-background/90 shadow-sm backdrop-blur-sm"
+              size="sm"
+              className="pointer-events-auto h-7 max-w-[min(100%,11rem)] shrink truncate border border-border/80 bg-background/90 px-2 text-xs shadow-sm backdrop-blur-sm"
               disabled={visibilityPending}
-              aria-pressed={isPublic}
-              aria-label={
-                isPublic
-                  ? "Rendre cette grille privée"
-                  : "Rendre cette grille publique"
-              }
               onClick={() => void toggleVisibility()}
             >
-              {isPublic ? (
-                <Eye className="size-4" aria-hidden />
-              ) : (
-                <EyeOff className="size-4" aria-hidden />
-              )}
+              {isPublic ? "Ne plus publier" : "Publier"}
             </Button>
             <Button
               type="button"
@@ -309,7 +303,21 @@ export function SavedGridsGallery({
                 href="/jeu"
                 className={cardLinkClass}
                 aria-label={label}
-                onClick={() => stashPlayPayload(g.data)}
+                onClick={() => {
+                  if (
+                    isOwner &&
+                    typeof g.data === "object" &&
+                    g.data !== null
+                  ) {
+                    stashPlayPayload({
+                      ...(g.data as Record<string, unknown>),
+                      [PLAY_GRID_UPDATE_GRID_ID_KEY]: g.id,
+                      [PLAY_GRID_UPDATE_GRID_LIKE_COUNT_KEY]: g.likeCount ?? 0,
+                    });
+                  } else {
+                    stashPlayPayload(g.data);
+                  }
+                }}
               >
                 <GridThumbnail
                   gridId={g.id}

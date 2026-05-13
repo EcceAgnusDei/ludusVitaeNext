@@ -142,9 +142,7 @@ export async function listPublicGridsPage(
     .from(grid)
     .innerJoin(user, eq(user.id, grid.userId))
     .where(whereClause)
-    .orderBy(
-      ...(sort === "recent" ? orderByRecent : orderByPopular),
-    )
+    .orderBy(...(sort === "recent" ? orderByRecent : orderByPopular))
     .limit(fetchLimit);
 }
 
@@ -189,9 +187,7 @@ export async function listGridsForUserProfile(
   const { profileUserId, viewerId, sort } = args;
   const visibility = or(
     eq(grid.isPublic, true),
-    viewerId !== null && viewerId === profileUserId
-      ? sql`true`
-      : sql`false`,
+    viewerId !== null && viewerId === profileUserId ? sql`true` : sql`false`,
   );
   const whereClause = and(eq(grid.userId, profileUserId), visibility);
   const likeCount = likeCountExpr();
@@ -219,9 +215,7 @@ export async function listGridsForUserProfile(
     })
     .from(grid)
     .where(whereClause)
-    .orderBy(
-      ...(sort === "recent" ? orderByRecent : orderByPopular),
-    );
+    .orderBy(...(sort === "recent" ? orderByRecent : orderByPopular));
 
   return rows;
 }
@@ -259,16 +253,39 @@ export async function createGrid(
   return rowToGridJson(row);
 }
 
-export async function updateGridVisibility(
+export async function patchOwnedGrid(
   db: GridsDb,
-  args: { gridId: string; ownerUserId: string; isPublic: boolean },
+  args: {
+    gridId: string;
+    ownerUserId: string;
+    patch: {
+      isPublic?: boolean;
+      name?: string | null;
+      data?: object;
+    };
+  },
 ): Promise<GridJson | null> {
+  const setPayload: {
+    isPublic?: boolean;
+    name?: string | null;
+    data?: object;
+  } = {};
+  if (args.patch.isPublic !== undefined) {
+    setPayload.isPublic = args.patch.isPublic;
+  }
+  if (args.patch.name !== undefined) {
+    setPayload.name = args.patch.name;
+  }
+  if (args.patch.data !== undefined) {
+    setPayload.data = args.patch.data;
+  }
+  if (Object.keys(setPayload).length === 0) {
+    return null;
+  }
   const [row] = await db
     .update(grid)
-    .set({ isPublic: args.isPublic })
-    .where(
-      and(eq(grid.id, args.gridId), eq(grid.userId, args.ownerUserId)),
-    )
+    .set(setPayload)
+    .where(and(eq(grid.id, args.gridId), eq(grid.userId, args.ownerUserId)))
     .returning({
       id: grid.id,
       userId: grid.userId,
@@ -277,7 +294,11 @@ export async function updateGridVisibility(
       createdAt: grid.createdAt,
       isPublic: grid.isPublic,
     });
-  return row ? rowToGridJson(row) : null;
+  if (!row) return null;
+  if (args.patch.data !== undefined) {
+    await db.delete(gridLike).where(eq(gridLike.gridId, args.gridId));
+  }
+  return rowToGridJson(row);
 }
 
 export async function deleteOwnedGrid(
@@ -286,9 +307,7 @@ export async function deleteOwnedGrid(
 ): Promise<boolean> {
   const deleted = await db
     .delete(grid)
-    .where(
-      and(eq(grid.id, args.gridId), eq(grid.userId, args.ownerUserId)),
-    )
+    .where(and(eq(grid.id, args.gridId), eq(grid.userId, args.ownerUserId)))
     .returning({ id: grid.id });
   return deleted.length > 0;
 }
@@ -368,9 +387,7 @@ export async function removeGridLike(
 ): Promise<{ likeCount: number }> {
   await db
     .delete(gridLike)
-    .where(
-      and(eq(gridLike.gridId, gridId), eq(gridLike.userId, viewerId)),
-    );
+    .where(and(eq(gridLike.gridId, gridId), eq(gridLike.userId, viewerId)));
   const likeCount = await countLikesForGrid(db, gridId);
   return { likeCount };
 }

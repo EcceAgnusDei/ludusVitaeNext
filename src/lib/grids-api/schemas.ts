@@ -37,9 +37,34 @@ const createGridBodySchema = z
     }
   });
 
-const patchGridBodySchema = z.object({
-  isPublic: z.boolean({ message: "isPublic (booléen) est requis" }),
-});
+const patchGridBodySchema = z
+  .object({
+    isPublic: z.boolean().optional(),
+    name: z.union([z.string(), z.null()]).optional(),
+    data: z.unknown().optional(),
+  })
+  .superRefine((body, ctx) => {
+    if (
+      body.data !== undefined &&
+      (body.data === null || typeof body.data !== "object")
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        message: "data doit être un objet",
+      });
+    }
+    if (
+      body.isPublic === undefined &&
+      body.name === undefined &&
+      body.data === undefined
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        message:
+          "Au moins un champ parmi isPublic, name ou data doit être fourni.",
+      });
+    }
+  });
 
 export type CreateGridBody = z.infer<typeof createGridBodySchema>;
 export type PatchGridBody = z.infer<typeof patchGridBodySchema>;
@@ -154,7 +179,7 @@ export function parseCreateGridBody(
 }
 
 /*
- * Corps `PATCH /api/grids/[id]` pour la visibilité de la grille.
+ * Corps `PATCH /api/grids/[id]` : visibilité, nom et/ou données de la grille.
  */
 export function parsePatchGridBody(
   json: unknown,

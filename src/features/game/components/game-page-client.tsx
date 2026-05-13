@@ -3,6 +3,7 @@
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 
 import { Grid, type GridHandle } from "@/features/game/components/grid-canvas";
+import { ConfirmAlertDialog } from "@/components/ui/alert-dialog";
 import { InfoDialog } from "@/components/info-dialog";
 import { authClient } from "@/lib/auth-client";
 
@@ -20,7 +21,7 @@ import {
   GRID_AI_PROMPT_MAX_LENGTH,
   postGridAiCommand,
 } from "../lib/post-grid-ai-command";
-import { postSaveGrid } from "../lib/save-grid-api";
+import { patchSavedGridData, postSaveGrid } from "../lib/save-grid-api";
 import { useGridPlayHistorySession } from "../use-grid-play-history-session";
 
 import { GameSaveDbDialog } from "./game-save-db-dialog";
@@ -40,10 +41,15 @@ export function GamePageClient() {
 
   const [saveDbOpen, setSaveDbOpen] = useState(false);
   const [saveDbName, setSaveDbName] = useState("");
-  const [saveDbIsPublic, setSaveDbIsPublic] = useState(true);
   const [saveDbError, setSaveDbError] = useState<string | null>(null);
   const [saveDbSubmitting, setSaveDbSubmitting] = useState(false);
   const [saveDbSuccessOpen, setSaveDbSuccessOpen] = useState(false);
+
+  const [updateGridId, setUpdateGridId] = useState<string | null>(null);
+  const [updateGridLikeCount, setUpdateGridLikeCount] = useState(0);
+  const [updateGridPending, setUpdateGridPending] = useState(false);
+  const [updateGridLikesWarningOpen, setUpdateGridLikesWarningOpen] =
+    useState(false);
 
   const [gridAiPrompt, setGridAiPrompt] = useState("");
   const [gridAiSubmitting, setGridAiSubmitting] = useState(false);
@@ -83,6 +89,8 @@ export function GamePageClient() {
       (event) => {
         if (event.kind === "loaded") {
           consumeNavigationSnapshot(event.snapshot);
+          setUpdateGridId(event.updateGridId);
+          setUpdateGridLikeCount(event.likeCount);
           return;
         }
         if (event.kind === "invalid") {
@@ -221,14 +229,12 @@ export function GamePageClient() {
   const resetSaveDbModal = () => {
     setSaveDbOpen(false);
     setSaveDbName("");
-    setSaveDbIsPublic(true);
     setSaveDbError(null);
     setSaveDbSubmitting(false);
   };
 
   const openSaveDbModal = () => {
     setSaveDbName("");
-    setSaveDbIsPublic(true);
     setSaveDbError(null);
     setSaveDbSubmitting(false);
     setSaveDbOpen(true);
@@ -299,7 +305,7 @@ export function GamePageClient() {
       gridSize: grid.gridSize,
       cellSize: grid.cellSize,
       nameTrimmed: trimmedName,
-      isPublic: saveDbIsPublic,
+      isPublic: false,
     });
 
     setSaveDbSubmitting(true);
@@ -312,8 +318,39 @@ export function GamePageClient() {
       return;
     }
 
+    if (result.gridId) {
+      setUpdateGridId(result.gridId);
+      setUpdateGridLikeCount(0);
+    }
+
     resetSaveDbModal();
     setSaveDbSuccessOpen(true);
+  };
+
+  const handleUpdateGridExecute = async () => {
+    const grid = gridRef.current;
+    if (!grid || updateGridId === null) return;
+    setUpdateGridPending(true);
+    const result = await patchSavedGridData(updateGridId, {
+      aliveCells: grid.getAliveCellsCoords(),
+      gridSize: { ...grid.gridSize },
+      cellSize: grid.cellSize,
+    });
+    setUpdateGridPending(false);
+    if (!result.ok) {
+      setNoticeMessage(result.error);
+      return;
+    }
+    setUpdateGridLikeCount(0);
+    setNoticeMessage("Grille mise à jour");
+  };
+
+  const handleUpdateGridClick = () => {
+    if (updateGridLikeCount > 0) {
+      setUpdateGridLikesWarningOpen(true);
+      return;
+    }
+    void handleUpdateGridExecute();
   };
 
   return (
@@ -355,6 +392,26 @@ export function GamePageClient() {
         onLoadLocal={handleLoadLocal}
         showSaveToDb={!sessionPending && isLoggedIn}
         onOpenSaveDb={openSaveDbModal}
+        updateGridId={updateGridId}
+        onUpdateGrid={() => void handleUpdateGridClick()}
+        updateGridPending={updateGridPending}
+      />
+
+      <ConfirmAlertDialog
+        open={updateGridLikesWarningOpen}
+        onOpenChange={setUpdateGridLikesWarningOpen}
+        title="Attention!"
+        description={
+          <>Enregistrer vos modifications les supprimera les likes.</>
+        }
+        cancelLabel="Annuler"
+        confirmLabel="Mettre à jour"
+        confirmButtonVariant="default"
+        pending={updateGridPending}
+        onConfirm={async () => {
+          setUpdateGridLikesWarningOpen(false);
+          await handleUpdateGridExecute();
+        }}
       />
 
       <InfoDialog
@@ -376,11 +433,6 @@ export function GamePageClient() {
           if (saveDbError) setSaveDbError(null);
         }}
         maxNameLength={GRID_NAME_MAX_LENGTH}
-        isPublic={saveDbIsPublic}
-        onIsPublicChange={(v) => {
-          setSaveDbIsPublic(v);
-          if (saveDbError) setSaveDbError(null);
-        }}
         error={saveDbError}
         submitting={saveDbSubmitting}
         onCancel={resetSaveDbModal}

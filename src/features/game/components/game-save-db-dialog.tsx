@@ -20,8 +20,6 @@ type GameSaveDbDialogProps = {
   name: string;
   onNameChange: (value: string) => void;
   maxNameLength: number;
-  isPublic: boolean;
-  onIsPublicChange: (value: boolean) => void;
   error: string | null;
   submitting: boolean;
   onCancel: () => void;
@@ -34,8 +32,6 @@ export function GameSaveDbDialog({
   name,
   onNameChange,
   maxNameLength,
-  isPublic,
-  onIsPublicChange,
   error,
   submitting,
   onCancel,
@@ -66,31 +62,6 @@ export function GameSaveDbDialog({
                 {name.length}/{maxNameLength}
               </span>
             </label>
-            <div className="mt-4 flex items-center gap-3">
-              <button
-                type="button"
-                id="save-db-public-switch"
-                role="switch"
-                aria-checked={isPublic}
-                aria-labelledby="save-db-public-label"
-                disabled={submitting}
-                onClick={() => onIsPublicChange(!isPublic)}
-                className="group relative inline-flex h-7 w-12 shrink-0 rounded-full border border-border bg-muted transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-primary"
-                data-state={isPublic ? "on" : "off"}
-              >
-                <span
-                  className="pointer-events-none absolute top-0.5 left-0.5 size-5 rounded-full bg-background shadow-sm transition-transform group-data-[state=on]:translate-x-5"
-                  aria-hidden
-                />
-              </button>
-              <label
-                id="save-db-public-label"
-                htmlFor="save-db-public-switch"
-                className="cursor-pointer text-left text-sm font-normal text-muted-foreground"
-              >
-                Grille publique
-              </label>
-            </div>
             {error ? (
               <p className="mt-3 text-sm text-destructive" role="alert">
                 {error}

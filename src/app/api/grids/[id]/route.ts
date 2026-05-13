@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getDb } from "@/db";
-import { deleteOwnedGrid, updateGridVisibility } from "@/lib/grids-api/repository";
+import { deleteOwnedGrid, patchOwnedGrid } from "@/lib/grids-api/repository";
 import { parsePatchGridBody } from "@/lib/grids-api/schemas";
 import { requireUserId } from "@/lib/grids-api/route-auth";
 import {
@@ -41,7 +41,10 @@ export function PATCH(request: Request, ctx: RouteContext) {
     try {
       json = await request.json();
     } catch {
-      return NextResponse.json({ error: "Corps JSON invalide." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Corps JSON invalide." },
+        { status: 400 },
+      );
     }
 
     const parsed = parsePatchGridBody(json);
@@ -49,14 +52,29 @@ export function PATCH(request: Request, ctx: RouteContext) {
       return NextResponse.json({ error: parsed.error }, { status: 400 });
     }
 
+    const v = parsed.value;
+    const patch: {
+      isPublic?: boolean;
+      name?: string | null;
+      data?: object;
+    } = {};
+    if (v.isPublic !== undefined) patch.isPublic = v.isPublic;
+    if (v.name !== undefined) patch.name = v.name;
+    if (v.data !== undefined) {
+      patch.data = v.data as object;
+    }
+
     const db = getDb();
-    const updated = await updateGridVisibility(db, {
+    const updated = await patchOwnedGrid(db, {
       gridId: id,
       ownerUserId: auth.userId,
-      isPublic: parsed.value.isPublic,
+      patch,
     });
     if (!updated) {
-      return NextResponse.json({ error: "Grille introuvable" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Grille introuvable" },
+        { status: 404 },
+      );
     }
     return NextResponse.json(updated);
   });
@@ -69,7 +87,10 @@ export function DELETE(_request: Request, ctx: RouteContext) {
 
     const { id } = await ctx.params;
     if (!id) {
-      return NextResponse.json({ error: "Grille introuvable" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Grille introuvable" },
+        { status: 404 },
+      );
     }
 
     const db = getDb();
@@ -78,7 +99,10 @@ export function DELETE(_request: Request, ctx: RouteContext) {
       ownerUserId: auth.userId,
     });
     if (!ok) {
-      return NextResponse.json({ error: "Grille introuvable" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Grille introuvable" },
+        { status: 404 },
+      );
     }
     return new NextResponse(null, { status: 204 });
   });

@@ -33,6 +33,9 @@ type GameToolbarProps = {
   onLoadLocal: () => void;
   showSaveToDb: boolean;
   onOpenSaveDb: () => void;
+  updateGridId: string | null;
+  onUpdateGrid: () => void;
+  updateGridPending: boolean;
 };
 
 export function GameToolbar({
@@ -61,6 +64,9 @@ export function GameToolbar({
   onLoadLocal,
   showSaveToDb,
   onOpenSaveDb,
+  updateGridId,
+  onUpdateGrid,
+  updateGridPending,
 }: GameToolbarProps) {
   return (
     <div className="mx-auto flex max-w-[min(22rem,100%)] flex-col items-center gap-4">
@@ -223,15 +229,29 @@ export function GameToolbar({
         <legend className="sr-only">Sauvegarde locale</legend>
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-center">
           <Button type="button" variant="outline" onClick={onSaveLocal}>
-            Sauvegarder localement
+            Sauvegarde rapide
           </Button>
           <Button type="button" variant="outline" onClick={onLoadLocal}>
             Charger
           </Button>
           {showSaveToDb ? (
-            <Button type="button" variant="default" onClick={onOpenSaveDb}>
-              Enregistrer en base
-            </Button>
+            <>
+              <Button type="button" variant="default" onClick={onOpenSaveDb}>
+                Enregistrer nouveau
+              </Button>
+              {updateGridId !== null ? (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={updateGridPending}
+                  onClick={onUpdateGrid}
+                >
+                  {updateGridPending
+                    ? "Mise à jour…"
+                    : "Mettre à jour la grille"}
+                </Button>
+              ) : null}
+            </>
           ) : null}
         </div>
       </fieldset>

@@ -41,7 +41,7 @@ export function POST(request: Request) {
     const body = parsed.value;
     const name = body.name === undefined ? null : body.name;
     const data = body.data === undefined ? {} : (body.data as object);
-    const isPublic = body.isPublic === undefined ? true : body.isPublic;
+    const isPublic = body.isPublic === undefined ? false : body.isPublic;
 
     const db = getDb();
     const row = await createGrid(db, {

@@ -6,7 +6,12 @@ import { consumePlayGridPayloadFromSession } from "./lib/play-navigation-payload
 import type { GridPlaySnapshot } from "./lib/grid-types";
 
 export type PlayGridNavigationEvent =
-  | { kind: "loaded"; snapshot: GridPlaySnapshot }
+  | {
+      kind: "loaded";
+      snapshot: GridPlaySnapshot;
+      updateGridId: string | null;
+      likeCount: number;
+    }
   | { kind: "invalid" }
   | { kind: "none" };
 
@@ -26,7 +31,12 @@ export function usePlayGridPayloadOnMount(
   useEffect(() => {
     const result = consumePlayGridPayloadFromSession();
     if (result.kind === "ok") {
-      onEventRef.current({ kind: "loaded", snapshot: result.snapshot });
+      onEventRef.current({
+        kind: "loaded",
+        snapshot: result.snapshot,
+        updateGridId: result.updateGridId,
+        likeCount: result.likeCount,
+      });
       return;
     }
     if (result.kind === "invalid") {
