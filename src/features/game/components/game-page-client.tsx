@@ -15,19 +15,12 @@ import {
   loadGridFromLocalStorage,
   saveGridToLocalStorage,
 } from "../lib/game-local-storage";
-import {
-  dedupeCoords,
-  parseAndValidateGridCommandBatchJson,
-} from "../lib/grid-command";
+import { dedupeCoords } from "../lib/grid-command";
 import {
   applyPlaySnapshotToGridTarget,
   fitCoordsInGridWithMargin,
   type GridPlaySnapshot,
 } from "../lib/grid-handle-snapshot";
-import {
-  GRID_AI_PROMPT_MAX_LENGTH,
-  postGridAiCommand,
-} from "../lib/post-grid-ai-command";
 import { patchSavedGridData, postSaveGrid } from "../lib/save-grid-api";
 import { useGridPlayHistorySession } from "../use-grid-play-history-session";
 
@@ -65,10 +58,6 @@ export function GamePageClient({ children }: GamePageClientProps) {
   const [updateGridPending, setUpdateGridPending] = useState(false);
   const [updateGridLikesWarningOpen, setUpdateGridLikesWarningOpen] =
     useState(false);
-
-  const [gridAiPrompt, setGridAiPrompt] = useState("");
-  const [gridAiSubmitting, setGridAiSubmitting] = useState(false);
-  const gridAiInFlightRef = useRef(false);
 
   const [introDismissed, setIntroDismissed] = useState(false);
 
@@ -299,55 +288,6 @@ export function GamePageClient({ children }: GamePageClientProps) {
     setSaveDbOpen(true);
   };
 
-  const handleGridAiSubmit = useCallback(async () => {
-    const grid = gridRef.current;
-    if (!grid || gridAiInFlightRef.current) return;
-    gridAiInFlightRef.current = true;
-    setGridAiSubmitting(true);
-    try {
-      const api = await postGridAiCommand({
-        prompt: gridAiPrompt,
-        gridSize: grid.gridSize,
-        aliveCells: grid.getAliveCellsCoords(),
-      });
-      if (!api.ok) {
-        setNoticeMessage(api.error);
-        return;
-      }
-      const result = parseAndValidateGridCommandBatchJson(
-        api.commandJson,
-        grid.gridSize,
-      );
-      if (!result.ok) {
-        setNoticeMessage(result.error);
-        return;
-      }
-      if (result.commands.length > 0) {
-        recordCheckpointBeforeMutation(grid);
-      }
-      for (const cmd of result.commands) {
-        switch (cmd.action) {
-          case "setAlive":
-            grid.applyAliveCells(dedupeCoords(cmd.cells));
-            break;
-          case "resize":
-            grid.resize({ x: cmd.width, y: cmd.height });
-            break;
-          default: {
-            const _exhaustive: never = cmd;
-            throw new Error(
-              `Commande non gérée: ${JSON.stringify(_exhaustive)}`,
-            );
-          }
-        }
-      }
-      syncInputsFromGrid();
-    } finally {
-      gridAiInFlightRef.current = false;
-      setGridAiSubmitting(false);
-    }
-  }, [gridAiPrompt, syncInputsFromGrid, recordCheckpointBeforeMutation]);
-
   const handleSaveToDatabase = async () => {
     const grid = gridRef.current;
     if (!grid) return;
@@ -461,14 +401,6 @@ export function GamePageClient({ children }: GamePageClientProps) {
           setPatternOffsetInputs((s) => ({ ...s, [field]: value }))
         }
         onApplyPatternOffset={handleApplyPatternOffset}
-        gridAiEnabled={!sessionPending && isLoggedIn}
-        gridAiSessionPending={sessionPending}
-        gridAiPrompt={gridAiPrompt}
-        onGridAiPromptChange={(v) =>
-          setGridAiPrompt(v.slice(0, GRID_AI_PROMPT_MAX_LENGTH))
-        }
-        onGridAiSubmit={handleGridAiSubmit}
-        gridAiSubmitting={gridAiSubmitting}
         onSaveLocal={handleSaveLocal}
         onLoadLocal={handleLoadLocal}
         onLoadKnownPattern={handleLoadKnownPattern}

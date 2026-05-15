@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { geminiGridCommandJson } from "@/features/game/lib/gemini-grid-llm";
+import { geminiGridStateJson } from "@/features/game/lib/gemini-grid-llm";
 import {
   MAX_GRID_CELLS,
-  parseAndValidateGridCommandBatchJson,
+  parseAndValidateGridAiStateJson,
 } from "@/features/game/lib/grid-command";
-import { GRID_AI_PROMPT_MAX_LENGTH } from "@/features/game/lib/post-grid-ai-command";
+import {
+  GRID_AI_FEATURE_ENABLED,
+  GRID_AI_PROMPT_MAX_LENGTH,
+} from "@/features/game/lib/post-grid-ai-command";
 import { requireUserId } from "@/lib/grids-api/route-auth";
 
 export const runtime = "nodejs";
@@ -59,6 +62,13 @@ export const PUT = methodNotAllowed;
 export const DELETE = methodNotAllowed;
 
 export async function POST(request: Request) {
+  if (!GRID_AI_FEATURE_ENABLED) {
+    return NextResponse.json(
+      { error: "La commande IA est désactivée." },
+      { status: 404 },
+    );
+  }
+
   const auth = await requireUserId();
   if (!auth.ok) return auth.response;
 
@@ -94,26 +104,30 @@ export async function POST(request: Request) {
     );
   }
 
-  let commandJson: string;
+  let stateJson: string;
   try {
-    commandJson = await geminiGridCommandJson(
+    stateJson = await geminiGridStateJson(
       geminiKey,
       prompt,
       gridSize,
       aliveCells,
     );
-  } catch {
-    return NextResponse.json(
-      { error: "Le service IA a échoué. Réessayez plus tard." },
-      { status: 502 },
-    );
+  } catch (err) {
+    const message =
+      err instanceof Error && err.message.trim()
+        ? err.message
+        : "Le service IA a échoué. Réessayez plus tard.";
+    return NextResponse.json({ error: message }, { status: 502 });
   }
 
-  const batch = parseAndValidateGridCommandBatchJson(commandJson, gridSize);
-  if (!batch.ok) {
-    return NextResponse.json({ error: batch.error }, { status: 500 });
+  const state = parseAndValidateGridAiStateJson(stateJson);
+  if (!state.ok) {
+    return NextResponse.json({ error: state.error }, { status: 500 });
   }
 
-  const normalizedJson = JSON.stringify({ commands: batch.commands });
-  return NextResponse.json({ commandJson: normalizedJson });
+  return NextResponse.json({
+    gridSize: state.gridSize,
+    aliveCells: state.aliveCells,
+    ...(state.comment ? { comment: state.comment } : {}),
+  });
 }

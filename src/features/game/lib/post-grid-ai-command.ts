@@ -1,7 +1,8 @@
 import type { GridCoord } from "@/features/game/lib/grid-handle-snapshot";
 
-export const GRID_AI_PROMPT_MAX_LENGTH = 2_000;
+export const GRID_AI_FEATURE_ENABLED = false;
 
+export const GRID_AI_PROMPT_MAX_LENGTH = 2_000;
 export type PostGridAiCommandBody = {
   prompt: string;
   gridSize: GridCoord;
@@ -9,12 +10,16 @@ export type PostGridAiCommandBody = {
 };
 
 export type PostGridAiCommandResult =
-  | { ok: true; commandJson: string }
+  | { ok: true; gridSize: GridCoord; aliveCells: GridCoord[]; comment?: string }
   | { ok: false; error: string };
 
 export async function postGridAiCommand(
   body: PostGridAiCommandBody,
 ): Promise<PostGridAiCommandResult> {
+  if (!GRID_AI_FEATURE_ENABLED) {
+    return { ok: false, error: "La commande IA est désactivée." };
+  }
+
   if (body.prompt.length > GRID_AI_PROMPT_MAX_LENGTH) {
     return {
       ok: false,
@@ -41,7 +46,12 @@ export async function postGridAiCommand(
     return { ok: false, error: "Réponse serveur illisible." };
   }
 
-  const obj = data as { error?: unknown; commandJson?: unknown };
+  const obj = data as {
+    error?: unknown;
+    gridSize?: GridCoord;
+    aliveCells?: GridCoord[];
+    comment?: unknown;
+  };
 
   if (!res.ok) {
     const msg =
@@ -51,9 +61,19 @@ export async function postGridAiCommand(
     return { ok: false, error: msg };
   }
 
-  if (typeof obj.commandJson !== "string") {
+  if (!obj.gridSize || !Array.isArray(obj.aliveCells)) {
     return { ok: false, error: "Réponse serveur invalide." };
   }
 
-  return { ok: true, commandJson: obj.commandJson };
+  const comment =
+    typeof obj.comment === "string" && obj.comment.trim().length > 0
+      ? obj.comment.trim()
+      : undefined;
+
+  return {
+    ok: true,
+    gridSize: obj.gridSize,
+    aliveCells: obj.aliveCells,
+    ...(comment ? { comment } : {}),
+  };
 }

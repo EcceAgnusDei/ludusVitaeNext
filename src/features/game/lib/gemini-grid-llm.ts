@@ -1,41 +1,56 @@
 import { FinishReason, GoogleGenerativeAI } from "@google/generative-ai";
 
-import { MAX_GRID_CELLS } from "@/features/game/lib/grid-command";
 import type { GridCoord } from "@/features/game/lib/grid-handle-snapshot";
 
 const DEFAULT_MODEL = "gemini-2.5-flash-lite";
+//const DEFAULT_MODEL = "gemini-2.5-flash";
+//const DEFAULT_MODEL = "gemini-2.5-pro";
 
-const SYSTEM_INSTRUCTION = `Tu es un générateur de commandes pour un conception d'un automate cellulaire type Jeu de la vie de Conway.
+const SYSTEM_INSTRUCTION = `Tu es un générateur d'états de grille pour un automate cellulaire type Jeu de la vie de Conway.
 
 Règles du Jeu de la vie (Conway) :
 - Voisinage : 8 voisins (horizontal, vertical, diagonal).
 - Survie : une cellule vivante reste vivante si elle a 2 ou 3 voisins vivants.
 - Naissance : une cellule morte devient vivante si elle a exactement 3 voisins vivants.
 - Mort : sinon (sous/surpopulation), elle meurt ou reste morte.
-- Important : tu ne fais pas « évoluer » automatiquement la grille (générations) sauf si l’utilisateur le demande explicitement.
-- Ton role est d'inventer des coordonnées de cellules vivantes qui réalisent ce que l'utilisateur demande.
+- Important : tu ne fais pas « évoluer » automatiquement la grille (générations) sauf si l'utilisateur le demande explicitement.
+- Ton rôle est d'inventer des coordonnées de cellules vivantes qui réalisent ce que l'utilisateur demande.
 
 Règles strictes :
-- Coordonnées entières en 1-based : x de 1 à gridSize.x, y de 1 à gridSize.y (avant resize) ; après un resize, les coordonnées de setAlive sont dans la nouvelle largeur × hauteur.
+- Coordonnées entières en 1-based (x ≥ 1, y ≥ 1).
 - Tu réponds par UN SEUL objet JSON, sans markdown, sans texte avant ou après.
-- Format obligatoire : { "commands": [ ... ] } avec au moins une commande.
+- Format obligatoire : { "gridSize": { "x": number, "y": number }, "aliveCells": [ { "x", "y" }, ... ], "comment": string }
+- gridSize : dimensions souhaitées de la grille (entiers ≥ 1). Adapte la taille si la demande le nécessite.
+- aliveCells : liste complète et définitive des cellules vivantes (remplace entièrement l'état précédent). Le client agrandira la grille si des cellules dépassent gridSize.
+- "comment" est optionnel : ne mets un commentaire que si tu n'es pas sur de répondre tout à fait à la demande, une phrase ou deux, pas plus.
+- Pour « vider la grille », renvoie "aliveCells": [] (tu peux conserver ou ajuster gridSize selon le contexte).
+- Fais en sorte que les coordonnées que tu renvoie ne soient pas près des bords, sauf si l'utilisateur le demande explicitement.
 
-Types de commandes (clés en anglais), seulement ces deux actions :
-1) { "action": "resize", "width": number, "height": number } — redimensionne la grille (entiers ≥ 1, width × height ≤ ${MAX_GRID_CELLS}). Les cellules hors du nouveau rectangle sont perdues.
-2) { "action": "setAlive", "cells": [ { "x", "y" }, ... ] } — remplace entièrement l’ensemble des cellules vivantes par cette liste (grille entièrement décrite par cette commande).
-
-Ordre :
-- Au plus une commande de chaque type.
-- Si resize et setAlive sont toutes les deux présentes : les coordonnées de setAlive doivent être valides pour la grille **après** le resize (le serveur exécute toujours resize avant setAlive, même si tu listes setAlive en premier dans le JSON).
-
-Interprète la demande (souvent en français) à partir du contexte (gridSize, aliveCells, userRequest).
-Pour « vider la grille », utilise setAlive avec "cells": [].`;
+Interprète la demande (souvent en français) à partir du contexte (gridSize, aliveCells, userRequest).`;
 
 function resolveModelName(): string {
   const fromEnv = process.env.GEMINI_MODEL?.trim();
   return fromEnv && fromEnv.length > 0 ? fromEnv : DEFAULT_MODEL;
 }
-export async function geminiGridCommandJson(
+
+function geminiErrorMessage(err: unknown): string {
+  if (err instanceof Error && err.message.trim()) {
+    return err.message.trim();
+  }
+  if (err && typeof err === "object") {
+    const o = err as Record<string, unknown>;
+    if (typeof o.message === "string" && o.message.trim()) {
+      return o.message.trim();
+    }
+    const nested = o.error;
+    if (nested && typeof nested === "object") {
+      const msg = (nested as { message?: unknown }).message;
+      if (typeof msg === "string" && msg.trim()) return msg.trim();
+    }
+  }
+  return "Erreur inconnue.";
+}
+export async function geminiGridStateJson(
   apiKey: string,
   userPrompt: string,
   gridSize: GridCoord,
@@ -62,20 +77,33 @@ export async function geminiGridCommandJson(
     0,
   );
 
-  const result = await model.generateContent(
-    `Produis uniquement l'objet JSON { "commands": [ ... ] } pour ce contexte (si resize + setAlive : coordonnées de setAlive = grille après resize) :\n${context}`,
-  );
+  let result;
+  try {
+    result = await model.generateContent(
+      `Produis uniquement l'objet JSON { "gridSize": { "x", "y" }, "aliveCells": [ ... ], "comment"?: "..." } pour ce contexte :\n${context}`,
+    );
+  } catch (err) {
+    throw new Error(`Serveur IA : ${geminiErrorMessage(err)}`);
+  }
 
   const response = result.response;
   const candidates = response.candidates;
   const first = candidates?.[0];
   if (first?.finishReason && first.finishReason !== FinishReason.STOP) {
-    throw new Error(`Gemini : génération interrompue (${first.finishReason}).`);
+    throw new Error(
+      `Serveur IA : génération interrompue (${first.finishReason}).`,
+    );
   }
 
-  const text = response.text()?.trim();
+  let text: string | undefined;
+  try {
+    text = response.text()?.trim();
+  } catch (err) {
+    throw new Error(`Serveur IA : ${geminiErrorMessage(err)}`);
+  }
+
   if (!text) {
-    throw new Error("Gemini : réponse vide.");
+    throw new Error("Serveur IA : réponse vide.");
   }
 
   return text;

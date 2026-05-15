@@ -94,6 +94,13 @@ export function applyPlaySnapshotToGridTarget(
   let targetSize = snapshot.gridSize;
   const currentSize = grid.gridSize;
 
+  if (coordsExceedGrid(coords, targetSize)) {
+    const expanded = expandCoordsWithGridMargin(coords, targetSize);
+    if (!expanded.ok) return expanded.error;
+    coords = expanded.coords;
+    targetSize = expanded.gridSize;
+  }
+
   if (
     coordsExceedGrid(coords, currentSize) &&
     targetSize.x === currentSize.x &&
