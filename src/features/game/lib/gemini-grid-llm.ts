@@ -1,7 +1,7 @@
 import { FinishReason, GoogleGenerativeAI } from "@google/generative-ai";
 
 import { MAX_GRID_CELLS } from "@/features/game/lib/grid-command";
-import type { GridCoord } from "@/features/game/lib/grid-types";
+import type { GridCoord } from "@/features/game/lib/grid-handle-snapshot";
 
 const DEFAULT_MODEL = "gemini-2.5-flash-lite";
 

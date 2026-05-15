@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
 
 import { consumePlayGridPayloadFromSession } from "./lib/play-navigation-payload";
-import type { GridPlaySnapshot } from "./lib/grid-types";
+import type { GridPlaySnapshot } from "./lib/grid-handle-snapshot";
 
 export type PlayGridNavigationEvent =
   | {

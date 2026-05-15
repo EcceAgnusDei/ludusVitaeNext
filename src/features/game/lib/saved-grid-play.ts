@@ -1,4 +1,4 @@
-import type { GridCoord, GridPlaySnapshot } from "./grid-types";
+import type { GridCoord, GridPlaySnapshot } from "./grid-handle-snapshot";
 
 /*
  * Vérifie que les données de grille (ex. JSON en base) sont valides et les convertit

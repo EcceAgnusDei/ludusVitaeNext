@@ -1,4 +1,4 @@
-import type { GridCoord } from "./grid-types";
+import type { GridCoord } from "./grid-handle-snapshot";
 
 export type SaveGridApiBody = {
   data: {

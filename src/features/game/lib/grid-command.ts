@@ -4,7 +4,7 @@
  */
 import { z } from "zod";
 
-import type { GridCoord } from "@/features/game/lib/grid-types";
+import type { GridCoord } from "@/features/game/lib/grid-handle-snapshot";
 
 export const MAX_GRID_CELLS = 20_000;
 

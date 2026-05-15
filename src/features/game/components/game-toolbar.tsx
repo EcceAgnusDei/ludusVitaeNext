@@ -1,8 +1,27 @@
 "use client";
 
+import { Fragment } from "react";
+import { ChevronDownIcon } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import { MAX_GRID_CELLS } from "@/features/game/lib/grid-command";
+import type { GridPlaySnapshot } from "@/features/game/lib/grid-handle-snapshot";
+import {
+  KNOWN_GAME_OF_LIFE_PATTERNS,
+  KNOWN_PATTERN_CATEGORY_LABEL,
+  type KnownGameOfLifePattern,
+  type KnownPatternCategory,
+} from "@/features/game/lib/known-patterns";
 import { GRID_AI_PROMPT_MAX_LENGTH } from "@/features/game/lib/post-grid-ai-command";
 
 export { MAX_GRID_CELLS };
@@ -31,6 +50,7 @@ type GameToolbarProps = {
   gridAiSubmitting: boolean;
   onSaveLocal: () => void;
   onLoadLocal: () => void;
+  onLoadKnownPattern: (snapshot: GridPlaySnapshot) => void;
   showSaveToDb: boolean;
   onOpenSaveDb: () => void;
   updateGridId: string | null;
@@ -62,12 +82,37 @@ export function GameToolbar({
   gridAiSubmitting,
   onSaveLocal,
   onLoadLocal,
+  onLoadKnownPattern,
   showSaveToDb,
   onOpenSaveDb,
   updateGridId,
   onUpdateGrid,
   updateGridPending,
 }: GameToolbarProps) {
+  const patternMenuSections: {
+    category: KnownPatternCategory;
+    items: KnownGameOfLifePattern[];
+  }[] = [];
+  let currentCategory: KnownPatternCategory | null = null;
+  let currentItems: KnownGameOfLifePattern[] = [];
+  for (const p of KNOWN_GAME_OF_LIFE_PATTERNS) {
+    if (p.category !== currentCategory) {
+      if (currentCategory !== null) {
+        patternMenuSections.push({
+          category: currentCategory,
+          items: currentItems,
+        });
+      }
+      currentCategory = p.category;
+      currentItems = [p];
+    } else {
+      currentItems.push(p);
+    }
+  }
+  if (currentCategory !== null) {
+    patternMenuSections.push({ category: currentCategory, items: currentItems });
+  }
+
   return (
     <div className="mx-auto flex w-full max-w-[min(28rem,100%)] flex-col gap-4 md:max-w-[min(64rem,100%)] md:flex-row md:items-start md:justify-center md:gap-8">
       <div className="flex w-full min-w-0 flex-1 flex-col items-center gap-4">
@@ -206,6 +251,55 @@ export function GameToolbar({
         <fieldset className="w-full border-0 p-0">
           <legend className="sr-only">Sauvegarde locale</legend>
           <div className="flex flex-wrap items-center justify-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={playing}
+                    className="gap-1"
+                    title={
+                      playing
+                        ? "Mettez en pause pour charger un motif"
+                        : "Charger un motif classique"
+                    }
+                  >
+                    Motifs connus
+                    <ChevronDownIcon className="size-4 opacity-70" />
+                  </Button>
+                }
+              />
+              <DropdownMenuContent
+                align="center"
+                className="min-w-[min(20rem,calc(100vw-2rem))] max-w-[min(24rem,calc(100vw-2rem))]"
+              >
+                {patternMenuSections.map((section, sectionIdx) => (
+                  <Fragment key={section.category}>
+                    {sectionIdx > 0 ? <DropdownMenuSeparator /> : null}
+                    <DropdownMenuGroup>
+                      <DropdownMenuLabel className="text-xs">
+                        {KNOWN_PATTERN_CATEGORY_LABEL[section.category]}
+                      </DropdownMenuLabel>
+                      {section.items.map((p) => (
+                        <DropdownMenuItem
+                          key={p.id}
+                          className="flex-col items-start gap-0 py-2"
+                          onClick={() => onLoadKnownPattern(p.snapshot)}
+                        >
+                          <span className="font-medium">{p.name}</span>
+                          {p.author ? (
+                            <span className="text-xs text-muted-foreground">
+                              {p.author}
+                            </span>
+                          ) : null}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuGroup>
+                  </Fragment>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button type="button" variant="outline" onClick={onSaveLocal}>
               Sauvegarde rapide
             </Button>

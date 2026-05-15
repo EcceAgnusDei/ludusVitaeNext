@@ -1,4 +1,4 @@
-import type { GridCoord } from "@/features/game/lib/grid-types";
+import type { GridCoord } from "@/features/game/lib/grid-handle-snapshot";
 
 export const GRID_AI_PROMPT_MAX_LENGTH = 2_000;
 

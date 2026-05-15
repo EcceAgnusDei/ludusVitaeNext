@@ -17,7 +17,7 @@ import {
   computeNextGeneration,
   toCellIndex,
 } from "@/features/game/lib/game-of-life";
-import type { GridCoord } from "@/features/game/lib/grid-types";
+import type { GridCoord } from "@/features/game/lib/grid-handle-snapshot";
 
 export type GridHandle = {
   getAliveCellsCoords: () => GridCoord[];

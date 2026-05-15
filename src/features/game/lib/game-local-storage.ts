@@ -1,4 +1,4 @@
-import type { GridPlaySnapshot } from "./grid-types";
+import type { GridPlaySnapshot } from "./grid-handle-snapshot";
 import { parseSavedGridData } from "./saved-grid-play";
 
 const LOCAL_STORAGE_KEY = "grid";

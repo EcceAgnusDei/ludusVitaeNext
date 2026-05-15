@@ -1,5 +1,5 @@
 import { parseSavedGridData } from "./saved-grid-play";
-import type { GridPlaySnapshot } from "./grid-types";
+import type { GridPlaySnapshot } from "./grid-handle-snapshot";
 
 export const PLAY_GRID_SESSION_STORAGE_KEY = "ludusVitae:playGridPayload";
 

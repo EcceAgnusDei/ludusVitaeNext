@@ -1,4 +1,4 @@
-import type { GridPlaySnapshot } from "./grid-types";
+import type { GridPlaySnapshot } from "./grid-handle-snapshot";
 
 export const GRID_PLAY_UNDO_STACK_SESSION_KEY =
   "ludusvitae:grid-play-undo-stack";

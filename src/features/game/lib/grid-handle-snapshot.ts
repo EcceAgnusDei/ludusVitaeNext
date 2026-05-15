@@ -1,4 +1,10 @@
-import type { GridCoord, GridPlaySnapshot } from "./grid-types";
+export type GridCoord = { x: number; y: number };
+
+export type GridPlaySnapshot = {
+  gridSize: GridCoord;
+  aliveCells: GridCoord[];
+  cellSize?: string | null;
+};
 
 export type GridPlaySnapshotTarget = {
   pause: () => void;

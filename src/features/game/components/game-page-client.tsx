@@ -20,6 +20,10 @@ import {
   parseAndValidateGridCommandBatchJson,
 } from "../lib/grid-command";
 import {
+  applyPlaySnapshotToGridTarget,
+  type GridPlaySnapshot,
+} from "../lib/grid-handle-snapshot";
+import {
   GRID_AI_PROMPT_MAX_LENGTH,
   postGridAiCommand,
 } from "../lib/post-grid-ai-command";
@@ -209,6 +213,15 @@ export function GamePageClient({ children }: GamePageClientProps) {
     }
   };
 
+  const handleLoadKnownPattern = (snapshot: GridPlaySnapshot) => {
+    const grid = gridRef.current;
+    if (!grid) return;
+    recordCheckpointBeforeMutation(grid);
+    setPlaying(false);
+    applyPlaySnapshotToGridTarget(grid, snapshot);
+    syncInputsFromGrid();
+  };
+
   const handleLoadLocal = () => {
     const grid = gridRef.current;
     if (!grid) return;
@@ -221,13 +234,8 @@ export function GamePageClient({ children }: GamePageClientProps) {
         return;
       }
       recordCheckpointBeforeMutation(grid);
-      grid.pause();
       setPlaying(false);
-      grid.resize({ x, y });
-      grid.applyAliveCells(loaded.aliveCells);
-      if (loaded.cellSize) {
-        grid.resize(loaded.cellSize);
-      }
+      applyPlaySnapshotToGridTarget(grid, loaded);
       syncInputsFromGrid();
     } catch {
       setNoticeMessage("Impossible de charger la grille");
@@ -415,6 +423,7 @@ export function GamePageClient({ children }: GamePageClientProps) {
         gridAiSubmitting={gridAiSubmitting}
         onSaveLocal={handleSaveLocal}
         onLoadLocal={handleLoadLocal}
+        onLoadKnownPattern={handleLoadKnownPattern}
         showSaveToDb={!sessionPending && isLoggedIn}
         onOpenSaveDb={openSaveDbModal}
         updateGridId={updateGridId}

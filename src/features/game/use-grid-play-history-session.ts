@@ -22,8 +22,8 @@ import {
 import {
   applyPlaySnapshotToGridTarget,
   snapshotFromGridTarget,
-} from "./lib/grid-play-snapshot";
-import type { GridPlaySnapshot } from "./lib/grid-types";
+  type GridPlaySnapshot,
+} from "./lib/grid-handle-snapshot";
 
 type UseGridPlayHistorySessionParams = {
   gridRef: RefObject<GridHandle | null>;
