@@ -28,7 +28,7 @@ export function ForgotPasswordModal({
             Réinitialisation du mot de passe et assistance.
           </DialogDescription>
         </DialogHeader>
-        <div className="text-muted-foreground text-sm leading-relaxed">
+        <div className="text-center text-muted-foreground text-sm leading-relaxed">
           <p>
             Cette fonctionnalité n&apos;est pas encore disponible. En cas de
             nécessité (accès à un compte existant, etc.), vous pouvez me

@@ -56,7 +56,7 @@ function AlertDialogHeader({
   return (
     <div
       data-slot="alert-dialog-header"
-      className={cn("flex flex-col gap-2 text-left sm:text-left", className)}
+      className={cn("flex flex-col gap-2 text-center", className)}
       {...props}
     />
   );
@@ -193,7 +193,7 @@ export function ConfirmAlertDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         {error ? (
-          <p className="text-destructive text-sm" role="alert">
+          <p className="text-center text-destructive text-sm" role="alert">
             {error}
           </p>
         ) : null}

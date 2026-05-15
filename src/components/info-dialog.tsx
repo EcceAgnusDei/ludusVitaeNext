@@ -38,7 +38,7 @@ export function InfoDialog({
           <DialogTitle
             className={cn(
               title
-                ? "border-b border-border px-4 pt-3 pb-3 text-card-foreground"
+                ? "border-b border-border px-4 pt-3 pb-3 text-center text-card-foreground"
                 : "sr-only",
             )}
           >

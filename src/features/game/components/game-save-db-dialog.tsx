@@ -42,7 +42,7 @@ export function GameSaveDbDialog({
       <DialogContent className="p-0 sm:max-w-sm" showCloseButton>
         <DialogTitle className="sr-only">Enregistrer la grille</DialogTitle>
         <Card size="sm" className="border-0 shadow-none ring-0">
-          <CardHeader className="border-b border-border pb-4">
+          <CardHeader className="border-b border-border pb-4 text-center">
             <CardTitle>Enregistrer la grille</CardTitle>
           </CardHeader>
           <CardContent className="pt-4">
@@ -63,7 +63,7 @@ export function GameSaveDbDialog({
               </span>
             </label>
             {error ? (
-              <p className="mt-3 text-sm text-destructive" role="alert">
+              <p className="mt-3 text-center text-sm text-destructive" role="alert">
                 {error}
               </p>
             ) : null}
