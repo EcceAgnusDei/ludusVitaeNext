@@ -42,6 +42,9 @@ type GameToolbarProps = {
   cellSizeInput: string;
   onCellSizeInputChange: (value: string) => void;
   onApplyCellSize: () => void;
+  patternOffsetInputs: { right: string; down: string };
+  onPatternOffsetInputChange: (field: "right" | "down", value: string) => void;
+  onApplyPatternOffset: () => void;
   gridAiEnabled: boolean;
   gridAiSessionPending: boolean;
   gridAiPrompt: string;
@@ -74,6 +77,9 @@ export function GameToolbar({
   cellSizeInput,
   onCellSizeInputChange,
   onApplyCellSize,
+  patternOffsetInputs,
+  onPatternOffsetInputChange,
+  onApplyPatternOffset,
   gridAiEnabled,
   gridAiSessionPending,
   gridAiPrompt,
@@ -240,6 +246,48 @@ export function GameToolbar({
                   type="button"
                   variant="secondary"
                   onClick={onApplyCellSize}
+                >
+                  Ok
+                </Button>
+              </div>
+            </fieldset>
+            <fieldset className="flex min-w-0 flex-col gap-2 border-0 p-0">
+              <legend className="text-center text-sm font-medium">
+                Décalage du motif
+              </legend>
+              <div className="flex flex-wrap items-end justify-center gap-2">
+                <input
+                  type="number"
+                  value={patternOffsetInputs.right}
+                  onChange={(e) =>
+                    onPatternOffsetInputChange("right", e.target.value)
+                  }
+                  placeholder="Droite"
+                  aria-label="Décalage vers la droite en colonnes"
+                  className="w-20 shrink-0"
+                  disabled={playing}
+                />
+                <input
+                  type="number"
+                  value={patternOffsetInputs.down}
+                  onChange={(e) =>
+                    onPatternOffsetInputChange("down", e.target.value)
+                  }
+                  placeholder="Bas"
+                  aria-label="Décalage vers le bas en lignes"
+                  className="w-20 shrink-0"
+                  disabled={playing}
+                />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={playing}
+                  onClick={onApplyPatternOffset}
+                  title={
+                    playing
+                      ? "Mettez en pause pour décaler le motif"
+                      : "Décaler les cellules vivantes"
+                  }
                 >
                   Ok
                 </Button>

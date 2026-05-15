@@ -21,6 +21,7 @@ import {
 } from "../lib/grid-command";
 import {
   applyPlaySnapshotToGridTarget,
+  fitCoordsInGridWithMargin,
   type GridPlaySnapshot,
 } from "../lib/grid-handle-snapshot";
 import {
@@ -48,6 +49,10 @@ export function GamePageClient({ children }: GamePageClientProps) {
   const [noticeMessage, setNoticeMessage] = useState<string | null>(null);
   const [gridSizeInputs, setGridSizeInputs] = useState({ x: "", y: "" });
   const [cellSizeInput, setCellSizeInput] = useState("");
+  const [patternOffsetInputs, setPatternOffsetInputs] = useState({
+    right: "0",
+    down: "0",
+  });
 
   const [saveDbOpen, setSaveDbOpen] = useState(false);
   const [saveDbName, setSaveDbName] = useState("");
@@ -168,6 +173,44 @@ export function GamePageClient({ children }: GamePageClientProps) {
         `Largeur et hauteur entières ≥ 1, avec au plus ${MAX_GRID_CELLS.toLocaleString("fr-FR")} cellules au total (largeur × hauteur).`,
       );
     }
+  };
+
+  const handleApplyPatternOffset = () => {
+    const grid = gridRef.current;
+    if (!grid) return;
+
+    const dx = parseInt(patternOffsetInputs.right, 10);
+    const dy = parseInt(patternOffsetInputs.down, 10);
+    if (!Number.isInteger(dx) || !Number.isInteger(dy)) {
+      setNoticeMessage("Entrez des décalages entiers (colonnes et lignes).");
+      return;
+    }
+    if (dx === 0 && dy === 0) return;
+
+    const alive = grid.getAliveCellsCoords();
+    if (alive.length === 0) return;
+
+    const shifted = dedupeCoords(
+      alive.map((c) => ({ x: c.x + dx, y: c.y + dy })),
+    );
+    const fit = fitCoordsInGridWithMargin(shifted, grid.gridSize);
+    if (!fit.ok) {
+      setNoticeMessage(fit.error);
+      return;
+    }
+
+    recordCheckpointBeforeMutation(grid);
+    setPlaying(false);
+    const applyError = applyPlaySnapshotToGridTarget(grid, {
+      gridSize: grid.gridSize,
+      aliveCells: fit.coords,
+    });
+    if (applyError) {
+      setNoticeMessage(applyError);
+      return;
+    }
+    syncInputsFromGrid();
+    setPatternOffsetInputs({ right: "0", down: "0" });
   };
 
   const handleApplyCellSize = () => {
@@ -413,6 +456,11 @@ export function GamePageClient({ children }: GamePageClientProps) {
         cellSizeInput={cellSizeInput}
         onCellSizeInputChange={setCellSizeInput}
         onApplyCellSize={handleApplyCellSize}
+        patternOffsetInputs={patternOffsetInputs}
+        onPatternOffsetInputChange={(field, value) =>
+          setPatternOffsetInputs((s) => ({ ...s, [field]: value }))
+        }
+        onApplyPatternOffset={handleApplyPatternOffset}
         gridAiEnabled={!sessionPending && isLoggedIn}
         gridAiSessionPending={sessionPending}
         gridAiPrompt={gridAiPrompt}
