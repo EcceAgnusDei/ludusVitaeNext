@@ -34,7 +34,7 @@ function PostAuthRedirect({ to = "/" }: { to?: string }) {
     window.location.assign(postAuthRedirectPath(to));
   }, [to]);
   return (
-    <p className="text-muted-foreground text-center text-sm">
+    <p className="text-muted-foreground text-sm">
       Redirection en cours…
     </p>
   );
@@ -184,7 +184,7 @@ export function SignUpForm() {
             Créer un compte
           </Button>
 
-          <p className="text-muted-foreground text-center text-xs leading-relaxed">
+          <p className="text-muted-foreground text-xs leading-relaxed">
             En créant un compte, vous acceptez le traitement de vos données tel
             que décrit dans la{" "}
             <Link

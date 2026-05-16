@@ -35,7 +35,7 @@ export function MonEspaceTabPanel({ variant }: MonEspaceTabPanelProps) {
 
   if (sessionPending || (variant !== "likes" && !userId)) {
     return (
-      <p className="text-sm text-muted-foreground text-center">
+      <p className="text-sm text-muted-foreground">
         Chargement de vos grilles…
       </p>
     );
@@ -43,7 +43,7 @@ export function MonEspaceTabPanel({ variant }: MonEspaceTabPanelProps) {
 
   if (grids === null) {
     return (
-      <p className="text-sm text-muted-foreground text-center">
+      <p className="text-sm text-muted-foreground">
         Chargement de vos grilles…
       </p>
     );

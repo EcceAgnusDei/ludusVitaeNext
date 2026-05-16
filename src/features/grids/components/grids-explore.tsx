@@ -63,7 +63,7 @@ export function GridsExplore({ variant }: GridsExploreProps) {
 
       {loadMoreError !== null ? (
         <div className="flex flex-col items-center gap-2 py-2">
-          <p className="text-center text-sm text-destructive">
+          <p className="text-sm text-destructive">
             {loadMoreError}
           </p>
           <Button
@@ -80,7 +80,7 @@ export function GridsExplore({ variant }: GridsExploreProps) {
       ) : null}
 
       {loadingMore ? (
-        <p className="text-muted-foreground text-center text-sm">
+        <p className="text-muted-foreground text-sm">
           Chargement de la suite…
         </p>
       ) : null}

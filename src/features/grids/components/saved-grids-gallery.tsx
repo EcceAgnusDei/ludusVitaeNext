@@ -238,7 +238,7 @@ function GridCardToolbar({
       </div>
       {cardActionError ? (
         <p
-          className="text-destructive z-[1] w-full max-w-full px-1 text-center text-xs"
+          className="text-destructive z-[1] w-full max-w-full px-1 text-xs"
           role="alert"
         >
           {cardActionError}

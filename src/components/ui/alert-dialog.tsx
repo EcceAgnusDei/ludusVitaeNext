@@ -193,7 +193,7 @@ export function ConfirmAlertDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         {error ? (
-          <p className="text-center text-destructive text-sm" role="alert">
+          <p className="text-destructive text-sm" role="alert">
             {error}
           </p>
         ) : null}

@@ -63,7 +63,7 @@ export function GameSaveDbDialog({
               </span>
             </label>
             {error ? (
-              <p className="mt-3 text-center text-sm text-destructive" role="alert">
+              <p className="mt-3 text-sm text-destructive" role="alert">
                 {error}
               </p>
             ) : null}

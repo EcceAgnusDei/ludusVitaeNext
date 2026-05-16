@@ -127,6 +127,13 @@
   body {
     @apply bg-background text-foreground;
   }
+  :where(h1, h2, h3, h4, h5, h6, p) {
+    text-align: center;
+  }
+  main[data-page="home"] p,
+  main[data-page="legal"] p {
+    text-align: start;
+  }
 }
 
 /* Jeu de la vie : cellules (composant Grid) */

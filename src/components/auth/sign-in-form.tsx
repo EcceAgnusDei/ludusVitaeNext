@@ -118,7 +118,7 @@ export function SignInForm({
         Connexion
       </Button>
 
-      <p className="text-muted-foreground text-center text-sm">
+      <p className="text-muted-foreground text-sm">
         Pas encore de compte ?{" "}
         <Link
           href="/inscription"

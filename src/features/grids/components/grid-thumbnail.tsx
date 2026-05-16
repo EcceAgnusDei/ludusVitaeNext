@@ -160,12 +160,12 @@ export function GridThumbnail({
       }
     >
       {hasCaption ? (
-        <p className="text-foreground max-w-full break-words text-center text-sm font-medium whitespace-normal">
+        <p className="text-foreground max-w-full break-words text-sm font-medium whitespace-normal">
           {captionText}
         </p>
       ) : null}
       {showCreator ? (
-        <p className="text-muted-foreground max-w-full break-words text-center text-xs whitespace-normal">
+        <p className="text-muted-foreground max-w-full break-words text-xs whitespace-normal">
           {creatorText}
         </p>
       ) : null}

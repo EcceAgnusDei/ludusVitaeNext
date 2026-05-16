@@ -54,7 +54,10 @@ function Valeur({ value }: { value: string }) {
 
 export default function MentionsLegalesPage() {
   return (
-    <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8 md:py-12">
+    <main
+      data-page="legal"
+      className="mx-auto w-full max-w-2xl flex-1 px-4 py-8 md:py-12"
+    >
       <p className="mb-6">
         <Link
           href="/"

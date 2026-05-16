@@ -16,7 +16,10 @@ export const metadata = homeMetadata({
 
 export default function Home() {
   return (
-    <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8 text-center md:py-12">
+    <main
+      data-page="home"
+      className="mx-auto w-full max-w-2xl flex-1 px-4 py-8 md:py-12"
+    >
       <h1 className="font-heading mb-4 text-2xl font-semibold tracking-tight md:text-3xl">
         {siteMainTitle}
       </h1>
