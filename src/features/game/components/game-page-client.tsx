@@ -25,9 +25,9 @@ import { patchSavedGridData, postSaveGrid } from "../lib/save-grid-api";
 import { useGridPlayHistorySession } from "../use-grid-play-history-session";
 
 import { GameSaveDbDialog } from "./game-save-db-dialog";
-import { GameToolbar, MAX_GRID_CELLS } from "./game-toolbar";
+import { GRID_NAME_MAX_LENGTH } from "@/lib/grids-api/schemas";
 
-const GRID_NAME_MAX_LENGTH = 60;
+import { GameToolbar, MAX_GRID_CELLS } from "./game-toolbar";
 
 type GamePageClientProps = {
   children?: ReactNode;

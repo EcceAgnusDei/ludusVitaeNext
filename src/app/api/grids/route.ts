@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import { getDb } from "@/db";
 import { createGrid } from "@/lib/grids-api/repository";
 import { parseCreateGridBody } from "@/lib/grids-api/schemas";
+import { enforceGridCreateRateLimit } from "@/lib/grids-api/rate-limit";
 import { requireUserId } from "@/lib/grids-api/route-auth";
 import {
   gridsMethodNotAllowed,
@@ -25,6 +26,9 @@ export function POST(request: Request) {
   return withGridsRouteErrors(async () => {
     const auth = await requireUserId();
     if (!auth.ok) return auth.response;
+
+    const limited = await enforceGridCreateRateLimit(auth.userId);
+    if (limited) return limited;
 
     let json: unknown;
     try {

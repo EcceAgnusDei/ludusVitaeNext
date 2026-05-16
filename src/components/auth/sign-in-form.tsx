@@ -8,6 +8,7 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 
 import { authClient } from "@/lib/auth-client";
+import { resolveAuthFormError } from "@/lib/auth-client-error";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -54,7 +55,10 @@ export function SignInForm({
       });
       if (error) {
         setFormError(
-          error.message ?? "Une erreur est survenue lors de la connexion.",
+          resolveAuthFormError(
+            error,
+            "Une erreur est survenue lors de la connexion.",
+          ),
         );
         return;
       }

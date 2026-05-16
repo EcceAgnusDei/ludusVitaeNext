@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 
 import { authClient } from "@/lib/auth-client";
+import { resolveAuthFormError } from "@/lib/auth-client-error";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -86,7 +87,10 @@ export function SignUpForm() {
       });
       if (error) {
         setFormError(
-          error.message ?? "Une erreur est survenue lors de l'inscription.",
+          resolveAuthFormError(
+            error,
+            "Une erreur est survenue lors de l'inscription.",
+          ),
         );
         return;
       }

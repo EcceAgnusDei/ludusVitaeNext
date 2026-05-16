@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getDb } from "@/db";
 import { addGridLike, removeGridLike } from "@/lib/grids-api/repository";
+import { enforceGridLikeRateLimit } from "@/lib/grids-api/rate-limit";
 import { requireUserId } from "@/lib/grids-api/route-auth";
 import {
   gridsMethodNotAllowed,
@@ -26,6 +27,9 @@ export function POST(_request: Request, ctx: RouteContext) {
     const auth = await requireUserId();
     if (!auth.ok) return auth.response;
 
+    const limited = await enforceGridLikeRateLimit(auth.userId);
+    if (limited) return limited;
+
     const { id } = await ctx.params;
     if (!id) {
       return NextResponse.json(
@@ -47,6 +51,9 @@ export function DELETE(_request: Request, ctx: RouteContext) {
   return withGridsRouteErrors(async () => {
     const auth = await requireUserId();
     if (!auth.ok) return auth.response;
+
+    const limited = await enforceGridLikeRateLimit(auth.userId);
+    if (limited) return limited;
 
     const { id } = await ctx.params;
     if (!id) {

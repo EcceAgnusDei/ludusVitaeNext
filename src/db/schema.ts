@@ -1,8 +1,10 @@
 import { sql } from "drizzle-orm";
 import {
+  bigint,
   boolean,
   foreignKey,
   index,
+  integer,
   jsonb,
   pgTable,
   primaryKey,
@@ -128,6 +130,12 @@ export const account = pgTable(
     }).onDelete("cascade"),
   ],
 );
+
+export const rateLimit = pgTable("rateLimit", {
+  key: text().primaryKey().notNull(),
+  count: integer().notNull(),
+  lastRequest: bigint({ mode: "number" }).notNull(),
+});
 
 export const verification = pgTable(
   "verification",

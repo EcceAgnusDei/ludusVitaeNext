@@ -5,7 +5,7 @@ import { i18n } from "@better-auth/i18n";
 import { nextCookies } from "better-auth/next-js";
 import { betterAuthFrMessages } from "@/lib/better-auth-fr-translations";
 import { sql } from "drizzle-orm";
-import { account, session, user, verification } from "@/db/schema";
+import { account, rateLimit, session, user, verification } from "@/db/schema";
 import { getDb } from "@/db";
 
 /* Unicité du nom affiché à l’inscription uniquement (pas de changement de nom côté app). */
@@ -55,15 +55,33 @@ const trustedOrigins = (): string[] => {
   return Array.from(new Set([base, ...fromEnv]));
 };
 
+const authRateLimitEnabled =
+  process.env.NODE_ENV === "production" ||
+  process.env.AUTH_RATE_LIMIT_ENABLED === "true";
+
 export const auth = betterAuth({
   database: drizzleAdapter(getDb(), {
     provider: "pg",
-    schema: { user, session, account, verification },
+    schema: { user, session, account, verification, rateLimit },
     camelCase: true,
   }),
   baseURL: resolveBaseURL(),
   secret: resolveSecret(),
   trustedOrigins: trustedOrigins(),
+  rateLimit: {
+    enabled: authRateLimitEnabled,
+    storage: "database",
+    customRules: {
+      "/sign-in/email": {
+        window: 60 * 15,
+        max: 10,
+      },
+      "/sign-up/email": {
+        window: 60 * 60,
+        max: 3,
+      },
+    },
+  },
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,

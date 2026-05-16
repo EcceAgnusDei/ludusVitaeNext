@@ -15,6 +15,13 @@
       "when": 1776263968184,
       "tag": "0001_grid_indexes_created_at_desc",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1776800000000,
+      "tag": "0002_auth_rate_limit",
+      "breakpoints": true
     }
   ]
 }

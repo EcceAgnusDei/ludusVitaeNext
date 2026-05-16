@@ -4,12 +4,15 @@
 
 import { z } from "zod";
 
+import { MAX_GRID_CELLS } from "@/features/game/lib/grid-command";
 import {
   parseGridsListCursor,
   parseGridsPageLimit,
   type GridsCursorPayload,
   type GridsListSortMode,
 } from "@/lib/grids-api/cursor";
+
+export const GRID_NAME_MAX_LENGTH = 60;
 
 // =============================================================================
 // Validation — schémas Zod et règles sur la forme des données
@@ -19,6 +22,52 @@ const gridsSortSchema = z.enum(["recent", "popular"], {
   message: "Paramètre sort requis : recent ou popular",
 });
 
+function refineGridNameAndData(
+  body: { name?: string | null; data?: unknown },
+  ctx: z.RefinementCtx,
+): void {
+  if (body.name !== undefined && body.name !== null) {
+    if (body.name.length > GRID_NAME_MAX_LENGTH) {
+      ctx.addIssue({
+        code: "custom",
+        message: `Le nom de la grille ne peut pas dépasser ${GRID_NAME_MAX_LENGTH} caractères.`,
+        path: ["name"],
+      });
+    }
+  }
+
+  if (body.data === undefined) return;
+
+  if (body.data === null || typeof body.data !== "object") {
+    ctx.addIssue({
+      code: "custom",
+      message: "data doit être un objet",
+      path: ["data"],
+    });
+    return;
+  }
+
+  const aliveRaw = (body.data as Record<string, unknown>).aliveCells;
+  if (aliveRaw === undefined) return;
+
+  if (!Array.isArray(aliveRaw)) {
+    ctx.addIssue({
+      code: "custom",
+      message: "data.aliveCells doit être un tableau",
+      path: ["data", "aliveCells"],
+    });
+    return;
+  }
+
+  if (aliveRaw.length > MAX_GRID_CELLS / 3) {
+    ctx.addIssue({
+      code: "custom",
+      message: `data.aliveCells ne peut pas dépasser ${MAX_GRID_CELLS.toLocaleString("fr-FR")} cellules.`,
+      path: ["data", "aliveCells"],
+    });
+  }
+}
+
 const createGridBodySchema = z
   .object({
     name: z.union([z.string(), z.null()]).optional(),
@@ -26,15 +75,7 @@ const createGridBodySchema = z
     isPublic: z.boolean().optional(),
   })
   .superRefine((body, ctx) => {
-    if (
-      body.data !== undefined &&
-      (body.data === null || typeof body.data !== "object")
-    ) {
-      ctx.addIssue({
-        code: "custom",
-        message: "data doit être un objet",
-      });
-    }
+    refineGridNameAndData(body, ctx);
   });
 
 const patchGridBodySchema = z
@@ -44,15 +85,7 @@ const patchGridBodySchema = z
     data: z.unknown().optional(),
   })
   .superRefine((body, ctx) => {
-    if (
-      body.data !== undefined &&
-      (body.data === null || typeof body.data !== "object")
-    ) {
-      ctx.addIssue({
-        code: "custom",
-        message: "data doit être un objet",
-      });
-    }
+    refineGridNameAndData(body, ctx);
     if (
       body.isPublic === undefined &&
       body.name === undefined &&
