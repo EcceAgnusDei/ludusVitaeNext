@@ -9,6 +9,20 @@ Application web (Next.js) autour d’un **automate cellulaire** inspiré du [Jeu
 - **Comptes** : inscription, connexion et réinitialisation de mot de passe (e-mails transactionnels via Resend).
 - **Espace personnel** : grilles récentes, populaires, favoris.
 
+## Stack
+
+| Couche                        | Technologies                                                                                                                                                                                                                  |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Application**               | [Next.js](https://nextjs.org/) 16 (App Router), [React](https://react.dev/) 19, [TypeScript](https://www.typescriptlang.org/)                                                                                                 |
+| **UI**                        | [shadcn/ui](https://ui.shadcn.com/) (style base-nova, [Base UI](https://base-ui.com/)), [Tailwind CSS](https://tailwindcss.com/) 4, [Lucide](https://lucide.dev/) ; [Radix UI](https://www.radix-ui.com/) pour `alert-dialog` |
+| **Formulaires & validation**  | [React Hook Form](https://react-hook-form.com/), [Zod](https://zod.dev/), [@hookform/resolvers](https://github.com/react-hook-form/resolvers)                                                                                 |
+| **Authentification**          | [Better Auth](https://www.better-auth.com/) (+ [@better-auth/i18n](https://www.better-auth.com/docs/plugins/i18n))                                                                                                            |
+| **Base de données**           | [PostgreSQL](https://www.postgresql.org/) — [Drizzle ORM](https://orm.drizzle.team/) → driver [`pg`](https://node-postgres.com/) ; migrations [Drizzle Kit](https://orm.drizzle.team/kit-docs/overview)                       |
+| **E-mails transactionnels**   | [Resend](https://resend.com/) — dépendance présente, envoi non branché pour l’instant                                                                                                                                         |
+| **Commande IA sur la grille** | [Google Gemini](https://ai.google.dev/) ([`@google/generative-ai`](https://www.npmjs.com/package/@google/generative-ai)), optionnelle (`GEMINI_API_KEY`) - fonctionnalité non branchée                                        |
+| **Tests**                     | [Vitest](https://vitest.dev/) (unitaires et intégration), [Playwright](https://playwright.dev/) (e2e)                                                                                                                         |
+| **Outillage**                 | [ESLint](https://eslint.org/) (`eslint-config-next`), **pnpm** (`pnpm-lock.yaml`)                                                                                                                                             |
+
 ## Prérequis
 
 - **Node.js** 20+ (recommandé : aligné sur les `@types/node` du dépôt).
